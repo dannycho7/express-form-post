@@ -1,5 +1,5 @@
-var formPost = (path) => {
-	return require('./lib/fileupload')(path);
+var formPost = (options) => {
+	return require('./lib/express-form-post')(options);
 }
 
 module.exports = formPost;

@@ -8,6 +8,7 @@ app.get("*", (req, res, next) => {
 
 app.use((req, res, next) => {
 	res.render('index');
+	console.log(req.file);
 });
 
 app.listen(5000, () => {
