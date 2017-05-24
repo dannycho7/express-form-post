@@ -3,12 +3,13 @@ const path = require('path');
 const Busboy = require('busboy');
 const concat = require('concat-stream');
 const save_options = {
+	method: 'diskstorage',
 	directory: '',
 	filename: '',
-	mimetype: ''
-};
-const limits = {
+	mimetype: '',
+	limits: {
 
+	}
 };
 
 const fileHandler = (req, res, next) => {
@@ -18,7 +19,7 @@ const fileHandler = (req, res, next) => {
 		}
 		let busboy = new Busboy({ 
 			headers: req.headers,
-			limits: limits
+			limits: save_options.limits
 		});
 		busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
 			let save_directory = "";
@@ -27,12 +28,7 @@ const fileHandler = (req, res, next) => {
 			} else {
 				save_path = path.join(save_options.directory, save_options.filename);
 			}
-			let writeStream = fs.createWriteStream(save_path);
-			let file_contents = concat((data) => {
-				writeStream.write(data, () => {
-					console.log("Successfully saved file to", save_path);
-				});
-			});
+			let file_contents = require(path.join(__dirname, save_options.method))(save_path);
 			file.on('data', (data) => {
 				file_contents.write(data);
 			});
@@ -58,18 +54,11 @@ const fileHandler = (req, res, next) => {
 }
 
 module.exports = (options) => {
-	if (options.directory) {
-		save_options.directory = options.directory;
-	}
-	if (options.filename) {
-		save_options.filename = options.filename;
-	}
-	if (options.mimetype) {
-		save_options.mimetype = options.mimetype;
-	}
-	if (options.maxfileSize) {
-		limits.fileSize = options.maxfileSize;
-	}
-
+	save_options.method = options.method || "diskstorage";
+	save_options.directory = options.directory || "";
+	save_options.filename = options.filename || "";
+	save_options.mimetype = options.mimetype || "";
+	save_options.limits.fileSize = options.maxfileSize || "";
+	
 	return fileHandler;
 }
