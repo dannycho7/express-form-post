@@ -20,22 +20,40 @@ const fileHandler = (req, res, next) => {
 		if(req._body) {
 			return next();
 		}
+		req.body = {};
+		req.files = {};
 		let busboy = new Busboy({ 
 			headers: req.headers,
 			limits: options.limits
 		});
 		busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
 			let save_filename = options.filename || filename;
+			let uploadInfo = {
+				options: options,
+				filename: save_filename,
+				mimetype: mimetype,
+				fieldname: fieldname,
+				file: file,
+				encoding: encoding
+			}
 			let file_contents = require(path.join(__dirname, options.method))
-										(options, save_filename, mimetype, req, next);
+													(uploadInfo, req, next);
 			file.on('data', (data) => {
+				if (!req._file) {
+					req._file = true; // setting req._file to true to show at least 1 file has valid buffer
+				}
+				if (!req.files[fieldname]) {
+					req.files[fieldname] = {
+						_file: true // there is data in this particular file
+					}; 
+				}
 				file_contents.write(data);
 			});
 			file.on('limit', () => {
 				console.log("Limit reached");
 			});
 			file.on('end', () => {
-				if (!file.truncated) {
+				if (!file.truncated && req._file) {
 					file_contents.end();
 				} else {
 					// File upload failed from limit being reached
@@ -44,11 +62,14 @@ const fileHandler = (req, res, next) => {
 			});
 		});
 
-		// TODO: add validation here to check if a file is not actually being uploaded and then call next
 		busboy.on('field', (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) => {
-			console.log(inspect(val));
+			req.body[fieldname] = val;
 		});
 		busboy.on('finish', () => {
+			if(!req._file) {
+				// no file was uploaded
+				return next();
+			}
 			console.log("Finished receiving user input, actions depends on method");
 		});
 		req.pipe(busboy);
