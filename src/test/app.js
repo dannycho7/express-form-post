@@ -9,6 +9,13 @@ module.exports = (app) => {
 	app.set('view engine', 'ejs');
 	app.set('views', path.join(__dirname, "views"));
 	app.use(formPost({
+		method: 'disk-storage',
+		directory: path.join(__dirname, 'tmp'),
+		maxfileSize: 1000000
+	}));
+
+	/* 
+	app.use(formPost({
 		method: 's3-storage',
 		directory: 'tmp',
 		keys: {
@@ -18,5 +25,6 @@ module.exports = (app) => {
 		},
 		maxfileSize: 1000000
 	}));
+	*/
 
 }
