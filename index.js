@@ -1,1 +1,1 @@
-module.exports = require('./lib/express-form-post');
+module.exports = require("./lib/express-form-post");

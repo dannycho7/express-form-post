@@ -1,12 +1,12 @@
 {
   "name": "express-form-post",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple, reliable express http file and post body handler.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/test/bin/server.js",
-    "start:dev": "nodemon src/test/bin/server.js"
+    "start": "node test/bin/server.js",
+    "start:dev": "nodemon test/bin/server.js"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,7 @@
   "devDependencies": {
     "dotenv": "^4.0.0",
     "ejs": "^2.5.6",
+    "eslint": "^3.19.0",
     "express": "^4.15.3",
     "nodemon": "^1.11.0"
   }
