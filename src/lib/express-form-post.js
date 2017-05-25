@@ -2,20 +2,21 @@ const fs = require('fs');
 const path = require('path');
 const Busboy = require('busboy');
 const concat = require('concat-stream');
-const options = {
-	method: 'diskstorage',
-	directory: '',
-	filename: '',
-	mimetype: '',
-	limits: {
 
-	},
-	keys: {
+var ExpressFormPost = function(user_options) {
+	this.options = {
+		method: user_options.method || "diskstorage",
+		directory: user_options.directory || "",
+		filename: user_options.filename || "",
+		mimetype: user_options.mimetype || "",
+		limits: {
+			fileSize: user_options.maxfileSize || ""
+		},
+		keys: user_options.keys || ""
+	};
+}
 
-	}
-};
-
-const fileHandler = (req, res, next) => {
+const fileHandler = function(req, res, next) {
 	if(req.method == "POST") {
 		if(req._body) {
 			return next();
@@ -24,19 +25,19 @@ const fileHandler = (req, res, next) => {
 		req.files = {};
 		let busboy = new Busboy({ 
 			headers: req.headers,
-			limits: options.limits
+			limits: this.options.limits
 		});
 		busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-			let save_filename = options.filename || filename;
+			let save_filename = this.options.filename || filename;
 			let uploadInfo = {
-				options: options,
+				options: this.options,
 				filename: save_filename,
 				mimetype: mimetype,
 				fieldname: fieldname,
 				file: file,
 				encoding: encoding
 			}
-			let file_contents = require(path.join(__dirname, options.method))
+			let file_contents = require(path.join(__dirname, this.options.method))
 													(uploadInfo, req, next);
 			file.on('data', (data) => {
 				if (!req._file) {
@@ -78,13 +79,8 @@ const fileHandler = (req, res, next) => {
 	}
 }
 
-module.exports = (user_options) => {
-	options.method = user_options.method || "diskstorage";
-	options.directory = user_options.directory || "";
-	options.filename = user_options.filename || "";
-	options.mimetype = user_options.mimetype || "";
-	options.limits.fileSize = user_options.maxfileSize || "";
-	options.keys = user_options.keys || "";
-
-	return fileHandler;
+ExpressFormPost.prototype.default  = function() {
+	return fileHandler.bind(this);
 }
+
+module.exports = ExpressFormPost;
