@@ -8,8 +8,14 @@
     "start": "node test/bin/server.js",
     "start:dev": "nodemon test/bin/server.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "fileupload",
+    "amazon",
+    "aws",
+    "s3",
+    "disk"
+  ],
+  "author": "Danny Cho (dannycho7)",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.56.0",
