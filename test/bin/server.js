@@ -1,13 +1,13 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 require("../app")(app); // Initializing middleware
 
-app.get("*", (req, res, next) => {
-	res.render('index');
+app.get("*", (req, res) => {
+	res.render("index");
 });
 
-app.use((req, res, next) => {
-	res.render('index');
+app.use((req, res) => {
+	res.render("index");
 	console.log("req.files: ", req.files);
 	console.log("req.body: ", req.body);
 });

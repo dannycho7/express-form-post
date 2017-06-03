@@ -32,11 +32,6 @@ const fileHandler = function(req, res, next) {
 	}
 };
 
-
-const storeInDisk = function(busboy, req, next) {
-	
-}
-
 const storeInMemory = function(busboy, req, next) {
 	busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
 		let save_filename = this.options.filename || filename;
@@ -65,9 +60,11 @@ const storeInMemory = function(busboy, req, next) {
 		});
 		file.on("end", () => {
 			if (!file.truncated && req._file) {
+				console.log("Truncated:", file.truncated);
 				file_contents.end();
 			} else {
 				// File upload failed from limit being reached
+				req._file = undefined;
 			}
 			req._body = true;
 		});
@@ -85,7 +82,7 @@ const storeInMemory = function(busboy, req, next) {
 		}
 		console.log("Finished receiving user input, actions depends on method");
 	});
-}
+};
 
 ExpressFormPost.prototype.default  = function() {
 	return fileHandler.bind(this);
