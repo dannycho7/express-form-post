@@ -42,6 +42,6 @@ app.use(formPostHandler.default());
  * disk storage
  * aws s3
 
-### Currently working on:
+### Will be available soon:
  * google drive
  * dropbox
