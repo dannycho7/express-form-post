@@ -56,11 +56,10 @@ const storeInMemory = function(busboy, req, next) {
 			file_contents.write(data);
 		});
 		file.on("limit", () => {
-			console.error("Limit reached");
+			console.error("File limit reached");
 		});
 		file.on("end", () => {
 			if (!file.truncated && req._file) {
-				console.log("Truncated:", file.truncated);
 				file_contents.end();
 			} else {
 				// File upload failed from limit being reached
@@ -80,7 +79,6 @@ const storeInMemory = function(busboy, req, next) {
 			// no file was uploaded
 			return next();
 		}
-		console.log("Finished receiving user input, actions depends on method");
 	});
 };
 

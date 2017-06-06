@@ -18,6 +18,11 @@ app.use(formPostHandler.default());
 ```
 
 ### Usage with S3: 
+
+```
+$ npm install aws-sdk --save
+```
+
 ```
 var express = require('express');
 var app = express();
@@ -35,7 +40,6 @@ var formPostHandler = new formPost({
 
 app.use(formPostHandler.default());
 ```
-
 
 
 ## Available storage methods:
