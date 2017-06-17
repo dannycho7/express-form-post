@@ -7,6 +7,8 @@ const ExpressFormPost = function(user_options = {}) {
 	// validate
 	if(user_options.validate && typeof user_options.validate != "function") {
 		throw new Error("option 'validate' must be a function.");
+	} else {
+		user_options.validate = function() { return true; };
 	}
 
 	// max file size
@@ -20,8 +22,16 @@ const ExpressFormPost = function(user_options = {}) {
 
 	// Available storage methods
 	if(!["disk", "s3"].includes(user_options.store)) {
-		user_options.store = "disk";
+		if(user_options.store == undefined) {
+			user_options.store = "disk";
+		} else {
+			throw new Error("storage " + user_options.store + " is not supported by express-form-post");
+		}
 	}
+
+	// Setting default directory based on store
+	user_options.directory == undefined ? user_options.store == "disk" ? 
+		user_options.directory = path.join(module.parent.filename, "..") : user_options.directory = "" : "";
 
 	// filename options setup
 	if(typeof user_options.filename == "function") {
@@ -52,7 +62,7 @@ const ExpressFormPost = function(user_options = {}) {
 
 	this.options = {
 		store: user_options.store,
-		directory: user_options.directory || "tmp",
+		directory: user_options.directory,
 		filename: user_options.filename,
 		maxfileSize: user_options.maxfileSize,
 		validate: user_options.validate,
@@ -68,7 +78,8 @@ const storeInMemory = function(busboy, req, next) {
 			return;
 		}
 
-		let save_filename = this.options.filename(filename, fieldname, mimetype);
+		// user may use filename function but incorrectly return nothing. no warning supplied 
+		let save_filename = this.options.filename(filename, fieldname, mimetype) || filename;
 
 		let uploadInfo = {
 			directory: this.options.directory,
