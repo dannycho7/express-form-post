@@ -2,32 +2,24 @@ const express = require("express");
 const path = require("path");
 const logger = require("morgan");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
-const formPost = require("../index"); // npm module
-const formPostHandler = new formPost({
-	storage: "disk-storage", // Optional field; defaults to "disk-storage"
+const efp = require("../index"); // npm module
+const formPost = efp({
+	store: "disk", // Optional field; defaults to "disk-storage"
 	directory: path.join(__dirname, "tmp"),
-	maxfileSize: 10000
+	validate: {
+		maxfileSize: 10000
+	},
+	filename: function(filename, fieldname, mimetype) {
+		return fieldname + '-' + filename;
+	}
 });
 
 module.exports = (app) => {
 
-	app.use(logger("dev"));
+	// app.use(logger("dev"));
 	app.use(express.static(path.join(__dirname, "static")));
 	app.set("view engine", "ejs");
 	app.set("views", path.join(__dirname, "views"));
-	app.use(formPostHandler.default());
-
-	/* 
-	app.use(formPost({
-		method: 's3-storage',
-		directory: 'tmp',
-		keys: {
-			accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  			bucketName: process.env.S3_BUCKET_NAME
-		},
-		maxfileSize: 1000000
-	}));
-	*/
+	app.use(formPost.middleware());
 
 };

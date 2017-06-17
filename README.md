@@ -8,6 +8,8 @@ $ npm install express-form-post --save
 ```
 
 ### Basic Usage Example:
+The information for the file uploaded will be available in the files and body object in the request object.
+
 ```
 var express = require('express');
 var app = express();
@@ -27,8 +29,8 @@ $ npm install aws-sdk --save
 var express = require('express');
 var app = express();
 var formPost = require('express-form-post');
-var formPostHandler = new formPost({
-  method: 's3-storage',
+var formPostHandler = formPost({
+  method: 's3',
   directory: 'tmp',
   keys: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,

@@ -8,8 +8,8 @@ app.get("*", (req, res) => {
 
 app.use((req, res) => {
 	res.render("index");
-	console.log("req.files: ", req.files);
-	console.log("req.body: ", req.body);
+	console.log("TEST SERVER req.files: ", req.files);
+	console.log("TEST SERVER req.body: ", req.body);
 });
 
 app.listen(5000, () => {
