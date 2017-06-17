@@ -5,6 +5,8 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const efp = require("../index"); // npm module
 
+const formPost = efp();
+
 /*
 const formPost = efp({
 	store: "disk", // Optional field; defaults to "disk-storage"
@@ -17,7 +19,7 @@ const formPost = efp({
 
 	}
 });
-*/
+
 const formPost = efp({
 	store: "s3",
 	maxfileSize: 10000,
@@ -30,7 +32,8 @@ const formPost = efp({
 		bucketName: process.env.S3_BUCKET_NAME,
 		ACL: "public-read"
 	}
-})
+});
+*/
 
 module.exports = (app) => {
 
