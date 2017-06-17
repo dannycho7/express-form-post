@@ -14,12 +14,16 @@ const formPost = efp();
 const formPost = efp({
 	store: "disk", // Optional field; defaults to "disk-storage"
 	directory: path.join(__dirname, "tmp"),
-	maxfileSize: 10000,
+	maxfileSize: 1000000,
 	filename: function(filename, fieldname, mimetype) {
-		return fieldname + '-' + filename;
+		return Date.now() + '/' + mimetype + '/' + filename;
 	},
-	validate: function(fieldname, filename, mimetype) {
-
+	validate: function(fieldname, mimetype) {
+		console.log(mimetype);
+		if(mimetype != "application/pdf") {
+			return false;
+		}
+		return true;
 	}
 });
 

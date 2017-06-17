@@ -26,14 +26,15 @@ app.use(formPost.middleware());
 var express = require('express');
 var app = express();
 var efp = require("express-form-post");
-var formPost = efp({
+const formPost = efp({
 	store: "disk",
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 10000,
 	filename: function(filename, fieldname, mimetype) {
-		return fieldname + '-' + filename;
+		return Date.now() + '-' + filename;
 	},
 	validate: function(fieldname, filename, mimetype) {
+		console.log(mimetype);
 		if(mimetype != "application/pdf") {
 			return false;
 		}

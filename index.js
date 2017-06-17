@@ -6,8 +6,8 @@ const ExpressFormPost = function(user_options = {}) {
 	if(!(this instanceof ExpressFormPost)) return new ExpressFormPost(user_options);
 
 	// validate
-	if(user_options.validate && typeof user_options.validate != "function") {
-		throw new Error("option 'validate' must be a function.");
+	if(user_options.validate) {
+		if(typeof user_options.validate != "function") throw new Error("option 'validate' must be a function.");
 	} else {
 		user_options.validate = function() { return true; };
 	}
@@ -29,8 +29,9 @@ const ExpressFormPost = function(user_options = {}) {
 	}
 
 	// Setting default directory based on store
-	user_options.directory == undefined ? user_options.store == "disk" ? 
-		user_options.directory = path.join(module.parent.filename, "..") : user_options.directory = "" : "";
+	user_options.directory == undefined ? user_options.store == "disk" ? (
+		user_options.directory = path.join(module.parent.filename, "..")
+	) : user_options.directory = "" : "";
 
 	// filename options setup
 	if(typeof user_options.filename == "function") {
@@ -73,12 +74,20 @@ const ExpressFormPost = function(user_options = {}) {
 const storeInMemory = function(busboy, req, next) {
 	busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
 
-		if (this.options.validate(fieldname, filename, mimetype) == false) {
-			return;
+		if(!req._validate || this.options.validate(fieldname, mimetype) == false) {
+			req._validate == true ? (
+				req._validate = false,
+				this.handleError(new Error("Validation error by custom validate function"))
+			) : "";
+			return next();
 		}
 
 		// user may use filename function but incorrectly return nothing. no warning supplied 
 		let save_filename = this.options.filename(filename, fieldname, mimetype) || filename;
+		save_filename.includes("/") ? (
+			this.options.directory = path.join(this.options.directory, save_filename, ".."),
+			save_filename = path.basename(path.resolve(...(save_filename.split("/"))))
+		): "";
 
 		let uploadInfo = {
 			directory: this.options.directory,
@@ -112,7 +121,7 @@ const storeInMemory = function(busboy, req, next) {
 		});
 	});
 
-	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated) => {
+	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated, mimetype) => {
 		// Possibly should add some handler for if a certain value was truncated
 		!valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
 	});
@@ -132,6 +141,7 @@ const fileHandler = function(req, res, next) {
 		}
 		req.body = {};
 		req.files = {};
+		req._validate = true; // value of true means request is a valid request by the validate function
 		let busboy = new Busboy({ 
 			headers: req.headers,
 			limits: {
