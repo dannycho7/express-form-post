@@ -14,9 +14,7 @@ const ExpressFormPost = function(user_options = {}) {
 
 	// max file size
 	if(user_options.maxfileSize) {
-		if(typeof user_options.maxfileSize != "number") {
-			throw new Error("option 'maxfileSize' must be a number.");
-		} else if(!user_options.maxfileSize.isInteger()) {
+		if(!Number.isInteger(user_options.maxfileSize)) {
 			throw new Error("option 'maxfileSize' must be an integer (Measured in bytes).");
 		}
 	}
@@ -114,7 +112,7 @@ const storeInMemory = function(busboy, req, next) {
 		});
 	});
 
-	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated) => {\
+	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated) => {
 		// Possibly should add some handler for if a certain value was truncated
 		!valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
 	});
