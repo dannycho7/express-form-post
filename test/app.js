@@ -7,7 +7,7 @@ const efp = require("express-form-post");
 /*
 // Basic usage example
 const formPost = efp();
-*/
+
 
 
 // Usage for disk
@@ -27,11 +27,10 @@ const formPost = efp({
 	}
 });
 
-/*
 // Usage for s3
 const formPost = efp({
-	store: "s3",
-	maxfileSize: 10000,
+	store: "aws-s3",
+	maxfileSize: 100000,
 	filename: function(filename, fieldname, mimetype) {
 
 	},
@@ -42,7 +41,21 @@ const formPost = efp({
 		ACL: "public-read"
 	}
 });
+
 */
+
+// Usage with google drive
+const formPost = efp({
+	store: "google-drive",
+	maxfileSize: 100000,
+	filename: function(filename, fieldname, mimetype) {
+
+	},
+	keys: {
+		
+	}
+});
+
 
 module.exports = (app) => {
 

@@ -57,7 +57,7 @@ var express = require('express');
 var app = express();
 var efp = require('express-form-post');
 const formPost = efp({
-	store: "s3",
+	store: "aws-s3",
 	maxfileSize: 100000,
 	filename: function(filename, fieldname, mimetype) {
 		return filename;
