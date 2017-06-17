@@ -4,6 +4,8 @@ const logger = require("morgan");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const efp = require("../index"); // npm module
+
+/*
 const formPost = efp({
 	store: "disk", // Optional field; defaults to "disk-storage"
 	directory: path.join(__dirname, "tmp"),
@@ -15,6 +17,20 @@ const formPost = efp({
 
 	}
 });
+*/
+const formPost = efp({
+	store: "s3",
+	maxfileSize: 10000,
+	filename: function(filename, fieldname, mimetype) {
+
+	},
+	keys: {
+		accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+		secretAccessKey: process.env.secretAccessKey,
+		bucketName: process.env.S3_BUCKET_NAME,
+		ACL: "public-read"
+	}
+})
 
 module.exports = (app) => {
 

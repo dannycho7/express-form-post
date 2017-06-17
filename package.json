@@ -10,6 +10,13 @@
   },
   "keywords": [
     "fileupload",
+    "parser",
+    "files",
+    "file",
+    "upload",
+    "form",
+    "post",
+    "express",
     "amazon",
     "aws",
     "s3",
@@ -17,6 +24,10 @@
   ],
   "author": "Danny Cho (dannycho7)",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dannycho7/express-form-post.git"
+  },
   "dependencies": {
     "busboy": "^0.2.14",
     "concat-stream": "^1.6.0",
