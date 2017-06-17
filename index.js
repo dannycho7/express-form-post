@@ -20,7 +20,7 @@ const ExpressFormPost = function(user_options = {}) {
 	}
 
 	// Available storage methods
-	if(!["disk", "aws-s3"].includes(user_options.store)) {
+	if(!["disk", "aws-s3", "google-drive"].includes(user_input_options.store)) {
 		if(user_options.store == undefined) {
 			user_options.store = "disk";
 		} else {
