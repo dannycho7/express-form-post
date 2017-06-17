@@ -1,6 +1,7 @@
 "use strict";
 const path = require("path");
 const Busboy = require("busboy");
+const farmhash = require('farmhash');
 
 const ExpressFormPost = function(user_options = {}) {
 	if(!(this instanceof ExpressFormPost)) return new ExpressFormPost(user_options);
@@ -20,7 +21,7 @@ const ExpressFormPost = function(user_options = {}) {
 	}
 
 	// Available storage methods
-	if(!["disk", "aws-s3", "google-drive"].includes(user_input_options.store)) {
+	if(!["disk", "aws-s3", "google-drive"].includes(user_options.store)) {
 		if(user_options.store == undefined) {
 			user_options.store = "disk";
 		} else {
@@ -49,7 +50,7 @@ const ExpressFormPost = function(user_options = {}) {
 		case undefined:
 		case "": 
 			user_options.filename = function(filename) {
-				return filename;
+				return farmhash.hash64(filename);
 			};
 			break;
 		default:
@@ -82,8 +83,8 @@ const storeInMemory = function(busboy, req, next) {
 			return next();
 		}
 
-		// user may use filename function but incorrectly return nothing. no warning supplied 
-		let save_filename = this.options.filename(filename, fieldname, mimetype) || filename;
+		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash 32 bit
+		let save_filename = this.options.filename(filename, fieldname, mimetype) || farmhash.hash64(filename);
 		save_filename.includes("/") ? (
 			this.options.directory = path.join(this.options.directory, save_filename, ".."),
 			save_filename = path.basename(path.resolve(...(save_filename.split("/"))))

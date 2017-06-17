@@ -3,7 +3,7 @@
 A simple solution to handling file and form submissions <br/>
 
 ### Installation
-```Installation
+```sh
 $ npm install express-form-post --save
 ```
 
@@ -12,7 +12,7 @@ The information for the file uploaded will be available in the files and body ob
 
 ### Quick Start:
 
-```
+```javascript
 var express = require('express');
 var app = express();
 var efp = require('express-form-post');
@@ -21,8 +21,9 @@ var formPost = efp();
 app.use(formPost.middleware());
 ```
 
-### Disk Storage: 
-``` Disk storage
+### Disk Storage:
+
+```javascript
 var express = require('express');
 var app = express();
 var efp = require("express-form-post");
@@ -48,11 +49,11 @@ app.use(formPost.middleware(function(err) {
 
 ### Usage with S3: 
 
-```
+```sh
 $ npm install aws-sdk --save
 ```
 
-```
+```javascript
 var express = require('express');
 var app = express();
 var efp = require('express-form-post');
