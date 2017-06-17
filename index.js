@@ -1,3 +1,4 @@
+"use strict";
 const path = require("path");
 const Busboy = require("busboy");
 
@@ -12,10 +13,10 @@ const ExpressFormPost = function(user_options = {}) {
 	}
 
 	// max file size
-	if(user_options.maxfileSize && typeof user_options.maxfileSize != "number") {
-		throw new Error("option 'maxfileSize' must be a number.");
-
-		if(!user_options.maxfileSize.isInteger()) {
+	if(user_options.maxfileSize) {
+		if(typeof user_options.maxfileSize != "number") {
+			throw new Error("option 'maxfileSize' must be a number.");
+		} else if(!user_options.maxfileSize.isInteger()) {
 			throw new Error("option 'maxfileSize' must be an integer (Measured in bytes).");
 		}
 	}
@@ -42,21 +43,21 @@ const ExpressFormPost = function(user_options = {}) {
 				return filename; // returning the filename that is being uploaded
 			} 
 			return customName;
-		}
+		};
 		
 	} else {
 		switch(user_options.filename) {
-			case undefined:
-			case "": 
-				user_options.filename = function(filename, fieldname, mimetype) {
-					return filename;
-				}
-				break;
-			default:
-				let user_input = user_options.filename; // Closures are awesome
-				user_options.filename = function(filename, fieldname, mimetype) {
-					return user_input;
-				}
+		case undefined:
+		case "": 
+			user_options.filename = function(filename) {
+				return filename;
+			};
+			break;
+		default:
+			var user_input = user_options.filename; // Closures are awesome
+			user_options.filename = function() {
+				return user_input;
+			};
 		}
 	}
 
@@ -113,8 +114,9 @@ const storeInMemory = function(busboy, req, next) {
 		});
 	});
 
-	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) => {
-		req.body[fieldname] = val;
+	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated) => {\
+		// Possibly should add some handler for if a certain value was truncated
+		!valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
 	});
 	busboy.on("finish", () => {
 		if(req._files == 0) {
@@ -146,7 +148,7 @@ const fileHandler = function(req, res, next) {
 };
 
 ExpressFormPost.prototype.middleware = function(handleError = undefined) {
-	typeof handleError == "function" ? this.handleError = handleError : this.handleError = (err) => {};
+	typeof handleError == "function" ? this.handleError = handleError : this.handleError = () => {};
 	return fileHandler.bind(this);
 };
 

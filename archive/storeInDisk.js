@@ -2,6 +2,9 @@ const path = require("path");
 
 const storeInDisk = function(busboy, req, next) {
 	busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+		if(this.options.mimetype != mimetype) {
+			return false;
+		}
 		let save_filename = this.options.filename || filename;
 		let save_directory = path.join(this.options.directory, save_filename);
 		let file_contents = require("fs").createWriteStream(save_directory);
