@@ -72,15 +72,15 @@ const ExpressFormPost = function(user_options = {}) {
 
 };
 
-const storeInMemory = function(busboy, req, next) {
-	busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+const storeInMemory = function(busboy, req) {
 
-		if(!req._validate || this.options.validate(fieldname, mimetype) == false) {
-			req._validate == true ? (
-				req._validate = false,
+	busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+		if(!req.efp._validate || this.options.validate(fieldname, mimetype) == false) {
+			req.efp._validate == true ? (
+				req.efp._validate = false,
 				this.handleError(new Error("Validation error by custom validate function"))
 			) : "";
-			return next();
+			return this.finished();
 		}
 
 		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash 32 bit
@@ -102,7 +102,7 @@ const storeInMemory = function(busboy, req, next) {
 
 		// init concat-stream
 		const storeMethod = require(path.join(__dirname, "lib", this.options.store));
-		const file_contents = storeMethod(uploadInfo, req, next, this.handleError);
+		const file_contents = storeMethod(uploadInfo, req, this.finished, this.handleError);
 
 		file.on("data", (data) => {
 			if (!req.files[fieldname]) {
@@ -129,36 +129,58 @@ const storeInMemory = function(busboy, req, next) {
 	busboy.on("finish", () => {
 		if(req._files == 0) {
 			// no file was uploaded
-			return next();
+			return this.finished();
 		}
 	});
 };
 
 // Default
-const fileHandler = function(req, res, next) {
+const fileHandler = function(req, res, cb) {
 	if(req.method == "POST") {
-		if(req._body) {
-			return next();
+		/* 
+		 * In middleware, this.finished passes on to next middleware
+		 * In upload function, this.finished will be the callback with an err parameter. (Can be undefined)
+		 * This.finished will be called when finished with parsing the request to pass on to the cb action
+		 */
+		this.finished = function(err) {
+			if(req.efp._finished) return;
+			req.efp._finished = true;
+			if(err) return cb(err);
+			return cb();
 		}
+		this.handleError ? this.handleError : this.handleError = this.finished;
+
+		if(req._body) {
+			return this.finished();
+		}
+		req.efp = {};
 		req.body = {};
 		req.files = {};
-		req._validate = true; // value of true means request is a valid request by the validate function
+		req._files = 0;
+		req.efp._validate = true; // value of true means request is a valid request by the validate function
 		let busboy = new Busboy({ 
 			headers: req.headers,
 			limits: {
 				fileSize: this.options.maxfileSize
 			}
 		});
-		storeInMemory.bind(this)(busboy, req, next);
+		storeInMemory.bind(this)(busboy, req);
 		req.pipe(busboy);
 	} else {
-		return next();
+		return cb();
 	}
 };
 
 ExpressFormPost.prototype.middleware = function(handleError = undefined) {
 	typeof handleError == "function" ? this.handleError = handleError : this.handleError = () => {};
-	return fileHandler.bind(this);
+	return fileHandler.bind(this); // fileHandler will be called in app.use as (req, res, cb)
 };
+
+// Upload function to be used within routes. handleError set as callback as well and can be check with if (err)
+ExpressFormPost.prototype.upload = function(req, res, cb) {
+	// cb is cb in fileHandler param
+	fileHandler.bind(this)(req, res, cb);
+}
+
 
 module.exports = ExpressFormPost;

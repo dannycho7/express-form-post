@@ -5,10 +5,10 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 const efp = require("express-form-post");
 
 // Basic usage example
-const formPost = efp();
+// const formPost = efp();
 
 
-/*
+
 
 // Usage for disk
 const formPost = efp({
@@ -26,7 +26,7 @@ const formPost = efp({
 		return true;
 	}
 });
-
+/*
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
@@ -56,19 +56,17 @@ const formPost = efp({
 	}
 });
 */
-
 module.exports = (app) => {
 
 	app.use(express.static(path.join(__dirname, "static")));
 	app.set("view engine", "ejs");
 	app.set("views", path.join(__dirname, "views"));
-	app.use((req, res, next) => {
-		req.on("end", () => {
-			console.log("Request has ended");
+	app.post("*", (req, res, next) => {
+		formPost.upload(req, res, (err) => {
+			if(err) throw err;
+			console.log("Finished uploading!");
+			next();
 		});
 	});
-	app.use(formPost.middleware(function(err) {
-		console.log(err);
-	}));
 
 };
