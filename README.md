@@ -75,7 +75,18 @@ app.use(formPost.middleware(function(err) {
 	console.log(err);
 }));
 ```
-
+### As a async function
+```javascript
+app.post("*", (req, res, next) => { 
+	formPost.upload(req, res, (err) => {
+		if(err) {
+			console.log(err);
+		}
+		console.log("About to redirect?", req.files);
+		res.redirect("/");
+	});
+}
+```
 
 ## Available storage methods:
  * disk storage

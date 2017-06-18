@@ -136,16 +136,17 @@ const storeInMemory = function(busboy, req) {
 // Default
 const fileHandler = function(req, res, cb) {
 	if(req.method == "POST") {
-		/* 
-		 * In middleware, this.finished passes on to next middleware
-		 * In upload function, this.finished will be the callback with an err parameter. (Can be undefined)
-		 * This.finished will be called when finished with parsing the request to pass on to the cb action
-		 */
 		req.efp = {};
 		req.body = {};
 		req.files = {};
 		req._files = 0;
 		req.efp._validate = true; // value of true means request is a valid request by the validate function
+		/* 
+		 * In middleware, this.finished passes on to next middleware
+		 * Validation checking in this.finished because of upload function cb not next param in middleware
+		 * In upload function, this.finished will be the callback with an err parameter. (err be undefined)
+		 * this.finished will be called when finished with parsing the request to pass on to the cb action
+		 */
 		this.next = cb; // for middleware usage
 		this.finished = function(err) {
 			if(req.efp._finished) return;
