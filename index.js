@@ -66,6 +66,7 @@ const ExpressFormPost = function(user_options = {}) {
 		directory: user_options.directory,
 		filename: user_options.filename,
 		maxfileSize: user_options.maxfileSize,
+		minfileSize: user_options.minfileSize || 0,
 		validate: user_options.validate,
 		keys: user_options.keys
 	};
@@ -106,7 +107,7 @@ const storeInMemory = function(busboy, req) {
 
 		file.on("data", (data) => {
 			if(!req.efp._finished) {
-				if(!req.efp._data[fieldname]) req.efp._data[fieldname] = true;
+				!req.efp._data[fieldname] ? req.efp._data[fieldname] = data.length : req.efp._data[fieldname] += data.length;
 				file_contents.write(data);
 			}
 		});
@@ -114,6 +115,9 @@ const storeInMemory = function(busboy, req) {
 			this.handleError(new Error("File limit reached on file"));
 		});
 		file.on("end", () => {
+			if(this.options.minfileSize > req.efp._data[fieldname]) {
+				this.handleError(new Error("Uploaded file was smaller than minfileSize"));
+			}
 			if (req.efp._data[fieldname] && !file.truncated && !req.efp._finished) {
 				req._files++; // amount of files that were sent to store
 				file_contents.end();
@@ -134,7 +138,6 @@ const storeInMemory = function(busboy, req) {
 	});
 };
 
-// Default
 const fileHandler = function(req, res, cb) {
 	if(req.method == "POST") {
 		/*
@@ -169,7 +172,10 @@ const fileHandler = function(req, res, cb) {
 				return cb();
 			}
 		};
-		// 1st expr resolves to middleware and 2nd to upload
+		/*
+		 * A call to this.handleErro will nullify any subsequent calls to this.finished and this.handleError
+		 * 1st expr resolves to middleware and 2nd to upload
+		 */
 		this.handleError ? (
 			// User input based handle Error assignment - handleError could resolve to something not 
 			// a function if the user input is incorrect. ignore if so 

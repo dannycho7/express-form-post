@@ -9,7 +9,7 @@ $ npm install express-form-post --save
 
 ## Usage
 
-The information for the file uploaded will be available in the files and body object in the request object. express-form-post can be dropped in as middleware or used as a function to handle file upload. 
+The information for the file uploaded will be available in the `files` and `body` object in the `request` object. express-form-post can be dropped in as middleware or used as a function to handle file upload. 
 
 ## Quick Start
 
@@ -104,7 +104,8 @@ Key | Description | Note
 `store` | The type of store | check below for available store methods
 `directory` | The folder to which the file will be saved | defaults to current directory
 `filename` | function to determine file save name | defaults to the file's name on the user's computer
-`maxfileSize` | Size of the file in bytes | defaults to infiniti
+`maxfileSize` | Maximum Size of the uploaded file in bytes | defaults to infiniti
+`minfileSize` | Minimum Size of the uploaded file in bytes | defaults to 0
 `validate` | function to validate uploaded file |
 `keys` | The name of the file within the `destination` | `used for cloud storage`
 

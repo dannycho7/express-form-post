@@ -7,14 +7,12 @@ const efp = require("express-form-post");
 // Basic usage example
 // const formPost = efp();
 
-
-
-/*
 // Usage for disk
 const formPost = efp({
 	store: "disk", // Optional field; defaults to "disk-storage"
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 1000000,
+	minfileSize: 100,
 	filename: function(filename, fieldname, mimetype) {
 		return Date.now() +  "-" + filename;
 	},
@@ -25,7 +23,7 @@ const formPost = efp({
 		return true;
 	}
 });
-*/
+/*
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
