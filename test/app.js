@@ -61,11 +61,13 @@ module.exports = (app) => {
 	app.use(express.static(path.join(__dirname, "static")));
 	app.set("view engine", "ejs");
 	app.set("views", path.join(__dirname, "views"));
-	app.post("*", (req, res, next) => {
+	app.post("*", (req, res, next) => {	
 		formPost.upload(req, res, (err) => {
-			if(err) throw err;
-			console.log("Finished uploading!");
-			next();
+			if(err) {
+				console.log(err);
+			}
+			console.log("About to redirect?", req.files);
+			res.redirect('/');
 		});
 	});
 

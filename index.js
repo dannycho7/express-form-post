@@ -80,7 +80,7 @@ const storeInMemory = function(busboy, req) {
 				req.efp._validate = false,
 				this.handleError(new Error("Validation error by custom validate function"))
 			) : "";
-			return this.finished();
+			return;
 		}
 
 		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash 32 bit
@@ -118,13 +118,12 @@ const storeInMemory = function(busboy, req) {
 				req._files++; // increment count of files being uploaded to store
 				file_contents.end();
 			}
-			req._body = true;
 		});
 	});
 
 	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated, mimetype) => {
 		// Possibly should add some handler for if a certain value was truncated
-		!valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
+		req.efp._validate && !valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
 	});
 	busboy.on("finish", () => {
 		if(req._files == 0) {
@@ -142,6 +141,12 @@ const fileHandler = function(req, res, cb) {
 		 * In upload function, this.finished will be the callback with an err parameter. (Can be undefined)
 		 * This.finished will be called when finished with parsing the request to pass on to the cb action
 		 */
+		req.efp = {};
+		req.body = {};
+		req.files = {};
+		req._files = 0;
+		req.efp._validate = true; // value of true means request is a valid request by the validate function
+		this.next = cb; // for middleware usage
 		this.finished = function(err) {
 			if(req.efp._finished) return;
 			req.efp._finished = true;
@@ -153,11 +158,6 @@ const fileHandler = function(req, res, cb) {
 		if(req._body) {
 			return this.finished();
 		}
-		req.efp = {};
-		req.body = {};
-		req.files = {};
-		req._files = 0;
-		req.efp._validate = true; // value of true means request is a valid request by the validate function
 		let busboy = new Busboy({ 
 			headers: req.headers,
 			limits: {
@@ -172,12 +172,24 @@ const fileHandler = function(req, res, cb) {
 };
 
 ExpressFormPost.prototype.middleware = function(handleError = undefined) {
-	typeof handleError == "function" ? this.handleError = handleError : this.handleError = () => {};
+	typeof handleError == "function" ? (
+		this.handleError = (err) => { !req.efp._finished ? ( 
+			req.efp._finished = true, 
+			handleError(), 
+			this.next()
+		) : ""; } 
+	) : this.handleError = () => { !req.efp._finished ? (
+			req.efp._finished = true, 
+			this.next() 
+		): ""; };
+
 	return fileHandler.bind(this); // fileHandler will be called in app.use as (req, res, cb)
 };
 
 // Upload function to be used within routes. handleError set as callback as well and can be check with if (err)
 ExpressFormPost.prototype.upload = function(req, res, cb) {
+	// reassign in fileHandler
+	this.handleError = undefined; 
 	// cb is cb in fileHandler param
 	fileHandler.bind(this)(req, res, cb);
 }
