@@ -12,7 +12,7 @@ const formPost = efp({
 	store: "disk", // Optional field; defaults to "disk-storage"
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 1000000,
-	minfileSize: 100,
+	minfileSize: 1,
 	filename: function(filename, fieldname, mimetype) {
 		return Date.now() +  "-" + filename;
 	},

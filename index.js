@@ -37,10 +37,10 @@ const ExpressFormPost = function(user_options = {}) {
 	// filename options setup
 	if(typeof user_options.filename == "function") {
 		let customFileMethod = user_options.filename;
-		user_options.filename = function(filename, fieldname, mimetype) {
-			let customName = customFileMethod(filename, fieldname, mimetype);
+		user_options.filename = function(originalname, fieldname, mimetype) {
+			let customName = customFileMethod(originalname, fieldname, mimetype);
 			if(customName == undefined || customName == "") {
-				return filename; // returning the filename that is being uploaded
+				return originalname; // returning the original name that is being uploaded
 			} 
 			return customName;
 		};
@@ -49,8 +49,8 @@ const ExpressFormPost = function(user_options = {}) {
 		switch(user_options.filename) {
 		case undefined:
 		case "": 
-			user_options.filename = function(filename) {
-				return hasha(filename);
+			user_options.filename = function(originalname) {
+				return hasha(originalname);
 			};
 			break;
 		default:
@@ -85,7 +85,8 @@ const storeInMemory = function(busboy, req) {
 		}
 
 		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash
-		let save_filename = this.options.filename(filename, fieldname, mimetype) || hasha(filename);
+		let originalname = filename; // added for clarity on naming conventions
+		let save_filename = this.options.filename(originalname, fieldname, mimetype) || hasha(filename);
 		save_filename.includes("/") ? (
 			this.options.directory = path.join(this.options.directory, save_filename, ".."),
 			save_filename = path.basename(path.resolve(...(save_filename.split("/"))))

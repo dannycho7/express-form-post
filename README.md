@@ -32,10 +32,10 @@ const formPost = efp({
 	store: "disk",
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 10000,
-	filename: function(filename, fieldname, mimetype) {
-		return Date.now() + "-" + filename;
+	filename: function(originalname, fieldname, mimetype) {
+		return Date.now() + "-" + originalname;
 	},
-	validate: function(fieldname, filename, mimetype) {
+	validate: function(fieldname, originalname, mimetype) {
 		console.log(mimetype);
 		if(mimetype != "application/pdf") {
 			return false;
@@ -62,8 +62,8 @@ var efp = require("express-form-post");
 const formPost = efp({
 	store: "aws-s3",
 	maxfileSize: 100000,
-	filename: function(filename, fieldname, mimetype) {
-		return filename;
+	filename: function(originalname, fieldname, mimetype) {
+		return originalname;
 	},
 	keys: {
 		accessKeyId: process.env.AWS_ACCESS_KEY_ID,
