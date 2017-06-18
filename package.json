@@ -32,7 +32,8 @@
     "busboy": "^0.2.14",
     "concat-stream": "^1.6.0",
     "hasha": "^3.0.0",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "request": "^2.81.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.56.0",

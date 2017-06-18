@@ -198,15 +198,18 @@ const fileHandler = function(req, res, cb) {
 		) : this.handleError = this.finished;
 
 		if(req._body) return this.finished();
-
-		let busboy = new Busboy({ 
-			headers: req.headers,
-			limits: {
-				fileSize: this.options.maxfileSize
-			}
-		});
-		storeInMemory.bind(this)(busboy, req);
-		req.pipe(busboy);
+		try {
+			var busboy = new Busboy({ 
+				headers: req.headers,
+				limits: {
+					fileSize: this.options.maxfileSize
+				}
+			});
+			storeInMemory.bind(this)(busboy, req);
+			req.pipe(busboy);
+		} catch(err) {
+			this.handleError(err);
+		}
 	} else {
 		return cb();
 	}
