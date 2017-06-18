@@ -14,13 +14,12 @@ const efp = require("express-form-post");
 const formPost = efp({
 	store: "disk", // Optional field; defaults to "disk-storage"
 	directory: path.join(__dirname, "tmp"),
-	maxfileSize: 1000000,
+	maxfileSize: 100000,
 	filename: function(filename, fieldname, mimetype) {
-		return Date.now() + "/" + mimetype + "/" + filename;
+		return Date.now() +  "-" + filename;
 	},
 	validate: function(fieldname, mimetype) {
-		console.log(mimetype);
-		if(mimetype != "application/pdf") {
+		if(mimetype == "application/pdf") {
 			return false;
 		}
 		return true;
@@ -72,7 +71,8 @@ module.exports = (app) => {
 	}); 
 	*/
 	app.use(formPost.middleware((err) => {
-		if(err) throw err;
+		if(err) console.log(err);
+
 	}));
 
 };
