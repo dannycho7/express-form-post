@@ -105,17 +105,18 @@ const storeInMemory = function(busboy, req) {
 		const file_contents = storeMethod(uploadInfo, req, this.finished, this.handleError);
 
 		file.on("data", (data) => {
-			if (!req.files[fieldname]) {
-				req.files[fieldname] = {}; 
+			if(!req.efp._finished) {
+				if(!req.efp._data[fieldname]) req.efp._data[fieldname] = true;
+				file_contents.write(data);
 			}
-			file_contents.write(data);
 		});
 		file.on("limit", () => {
 			this.handleError(new Error("File limit reached on file"));
 		});
 		file.on("end", () => {
-			if (!file.truncated && req.files[fieldname]) {
-				req._files++; // increment count of files being uploaded to store
+			if (req.efp._data[fieldname] && !file.truncated && !req.efp._finished) {
+				req._files++; // amount of files that were sent to store
+				req.efp._data = false;
 				file_contents.end();
 			}
 		});
@@ -126,6 +127,7 @@ const storeInMemory = function(busboy, req) {
 		req.efp._validate && !valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
 	});
 	busboy.on("finish", () => {
+		req.efp.busboy._finished = true;
 		if(req._files == 0) {
 			// no file was uploaded
 			return this.finished();
@@ -136,11 +138,19 @@ const storeInMemory = function(busboy, req) {
 // Default
 const fileHandler = function(req, res, cb) {
 	if(req.method == "POST") {
-		req.efp = {};
+		/*
+		 * _validate defaults to true and becomes false if the file being uploaded is not valid
+		 * _finished is false by default and set to true if efp has "finished". Usually this just means that
+		 * the next middleware has been called already and further calls to finished and handleError does nothing
+		 * efp.busboy._finished is false by default and true if busboy is done parsing
+		 * _data tracks if a file field has transmitted data (or has contents). 
+		 * ^^ this is set to avoid errors with concat-stream empty buffers
+		 */
+		req.efp = { _validate: true, _finished: false, _data: [], busboy: { _finished: false }};
 		req.body = {};
 		req.files = {};
-		req._files = 0;
-		req.efp._validate = true; // value of true means request is a valid request by the validate function
+		req._files = 0; // the amount of files currently in the upload process after concatenating streams
+
 		/* 
 		 * In middleware, this.finished passes on to next middleware
 		 * Validation checking in this.finished because of upload function cb not next param in middleware
@@ -150,9 +160,15 @@ const fileHandler = function(req, res, cb) {
 		this.next = cb; // for middleware usage
 		this.finished = function(err) {
 			if(req.efp._finished) return;
-			req.efp._finished = true;
-			if(err) return cb(err);
-			return cb();
+			if(err) {
+				req.efp._finished = true;
+				return cb(err); // only gets called when upload is being used and as handleError
+			}
+			if(Object.keys(req.files).length == req._files && req.efp.busboy._finished) {
+				// all files that were sent to the store have been uploaded and busboy is done parsing
+				req.efp._finished = true;
+				return cb();
+			}
 		};
 		// 1st expr resolves to middleware and 2nd to upload
 		this.handleError ? (
@@ -160,7 +176,7 @@ const fileHandler = function(req, res, cb) {
 			// a function if the user input is incorrect. ignore if so 
 			typeof this.middleware.handleError == "function" ? (
 				this.handleError = (err) => {
-					!req.efp._finished ? (
+					!req.efp._finished? (
 						req.efp._finished = true, 
 						this.middleware.handleError(err), 
 						this.next()
@@ -168,7 +184,7 @@ const fileHandler = function(req, res, cb) {
 				} 
 			) : (
 				this.handleError = () => { 
-					!req.efp._finished ? (
+					!req.efp._finished && req._files == 0 ? (
 						req.efp._finished = true, 
 						this.next() 
 					): "";
