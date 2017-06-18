@@ -1,30 +1,31 @@
-# Express Form Post
+# Express Form Post [![npm version](https://badge.fury.io/js/express-form-post.svg)](https://badge.fury.io/js/express-form-post) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
 A simple solution to handling file and form submissions <br/>
 
-### Installation
+## Installation
 ```sh
 $ npm install express-form-post --save
 ```
 
-### Basic Usage Example:
-The information for the file uploaded will be available in the files and body object in the request object.
+## Usage
 
-### Quick Start:
+The information for the file uploaded will be available in the files and body object in the request object. express-form-post can be dropped in as middleware or used as a function to handle file upload. 
+
+## Quick Start
 
 ```javascript
-var express = require('express');
+var express = require("express");
 var app = express();
-var efp = require('express-form-post');
+var efp = require("express-form-post");
 var formPost = efp();
 
 app.use(formPost.middleware());
 ```
 
-### Disk Storage:
+## Disk Storage
 
 ```javascript
-var express = require('express');
+var express = require("express");
 var app = express();
 var efp = require("express-form-post");
 const formPost = efp({
@@ -32,7 +33,7 @@ const formPost = efp({
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 10000,
 	filename: function(filename, fieldname, mimetype) {
-		return Date.now() + '-' + filename;
+		return Date.now() + "-" + filename;
 	},
 	validate: function(fieldname, filename, mimetype) {
 		console.log(mimetype);
@@ -48,16 +49,16 @@ app.use(formPost.middleware(function(err) {
 }));
 ```
 
-### Usage with S3: 
+## Usage with S3
 
 ```sh
 $ npm install aws-sdk --save
 ```
 
 ```javascript
-var express = require('express');
+var express = require("express");
 var app = express();
-var efp = require('express-form-post');
+var efp = require("express-form-post");
 const formPost = efp({
 	store: "aws-s3",
 	maxfileSize: 100000,
@@ -77,7 +78,7 @@ app.use(formPost.middleware(function(err) {
 	console.log("Here are my files", req.files);
 }));
 ```
-### As a async function
+## As a async function
 ```javascript
 app.post("*", (req, res, next) => { 
 	formPost.upload(req, res, (err) => {
@@ -90,10 +91,28 @@ app.post("*", (req, res, next) => {
 }
 ```
 
-## Available storage methods:
+## API
+
+Further API documentation will be implemented soon.
+
+#### efp(opts)
+
+express-form-post accepts an "optional" options parameter
+
+Key | Description | Note
+--- | --- | ---
+`store` | The type of store | check below for available store methods
+`directory` | The folder to which the file will be saved | defaults to current directory
+`filename` | function to determine file save name | defaults to the file's name on the user's computer
+`maxfileSize` | Size of the file in bytes | defaults to infiniti
+`validate` | function to validate uploaded file |
+`keys` | The name of the file within the `destination` | `used for cloud storage`
+
+
+## Available storage methods
  * disk storage
  * aws s3
 
-### Will be available soon:
+### Will be available soon
  * google drive
  * dropbox
