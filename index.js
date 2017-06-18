@@ -1,7 +1,7 @@
 "use strict";
 const path = require("path");
 const Busboy = require("busboy");
-const farmhash = require("farmhash");
+const hasha = require("hasha");
 
 const ExpressFormPost = function(user_options = {}) {
 	if(!(this instanceof ExpressFormPost)) return new ExpressFormPost(user_options);
@@ -50,7 +50,7 @@ const ExpressFormPost = function(user_options = {}) {
 		case undefined:
 		case "": 
 			user_options.filename = function(filename) {
-				return farmhash.hash64(filename);
+				return hasha(filename);
 			};
 			break;
 		default:
@@ -84,8 +84,8 @@ const storeInMemory = function(busboy, req) {
 			return;
 		}
 
-		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash 32 bit
-		let save_filename = this.options.filename(filename, fieldname, mimetype) || farmhash.hash64(filename);
+		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash
+		let save_filename = this.options.filename(filename, fieldname, mimetype) || hasha(filename);
 		save_filename.includes("/") ? (
 			this.options.directory = path.join(this.options.directory, save_filename, ".."),
 			save_filename = path.basename(path.resolve(...(save_filename.split("/"))))
@@ -173,7 +173,7 @@ const fileHandler = function(req, res, cb) {
 			}
 		};
 		/*
-		 * A call to this.handleErro will nullify any subsequent calls to this.finished and this.handleError
+		 * A call to this.handleError will nullify any subsequent calls to this.finished and this.handleError
 		 * 1st expr resolves to middleware and 2nd to upload
 		 */
 		this.handleError ? (
