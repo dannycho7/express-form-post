@@ -43,7 +43,8 @@ const formPost = efp({
 });
 
 app.use(formPost.middleware(function(err) {
-	console.log(err);
+	if(err) console.log(err);
+	console.log("Here are my files:", req.files);
 }));
 ```
 
@@ -72,7 +73,8 @@ const formPost = efp({
 })
 
 app.use(formPost.middleware(function(err) {
-	console.log(err);
+	if(err) console.log(err);
+	console.log("Here are my files", req.files);
 }));
 ```
 ### As a async function
@@ -82,7 +84,7 @@ app.post("*", (req, res, next) => {
 		if(err) {
 			console.log(err);
 		}
-		console.log("About to redirect?", req.files);
+		console.log("My files are located here:", req.files);
 		res.redirect("/");
 	});
 }

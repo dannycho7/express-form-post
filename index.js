@@ -116,7 +116,6 @@ const storeInMemory = function(busboy, req) {
 		file.on("end", () => {
 			if (req.efp._data[fieldname] && !file.truncated && !req.efp._finished) {
 				req._files++; // amount of files that were sent to store
-				req.efp._data = false;
 				file_contents.end();
 			}
 		});

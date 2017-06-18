@@ -9,29 +9,28 @@ const efp = require("express-form-post");
 
 
 
-
+/*
 // Usage for disk
 const formPost = efp({
 	store: "disk", // Optional field; defaults to "disk-storage"
 	directory: path.join(__dirname, "tmp"),
-	maxfileSize: 100000,
+	maxfileSize: 1000000,
 	filename: function(filename, fieldname, mimetype) {
 		return Date.now() +  "-" + filename;
 	},
 	validate: function(fieldname, mimetype) {
-		if(mimetype == "application/pdf") {
+		if(mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
 			return false;
 		}
 		return true;
 	}
 });
-/*
+*/
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
-	maxfileSize: 100000,
-	filename: function(filename, fieldname, mimetype) {
-
+	filename: function(filename, fieldname) {
+		return fieldname + "-" + filename;
 	},
 	keys: {
 		accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -41,7 +40,6 @@ const formPost = efp({
 	}
 });
 
-*/
 /*
 // Usage with google drive
 const formPost = efp({
