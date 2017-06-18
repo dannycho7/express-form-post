@@ -16,7 +16,7 @@ const formPost = efp({
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 1000000,
 	filename: function(filename, fieldname, mimetype) {
-		return Date.now() + '/' + mimetype + '/' + filename;
+		return Date.now() + "/" + mimetype + "/" + filename;
 	},
 	validate: function(fieldname, mimetype) {
 		console.log(mimetype);
@@ -61,14 +61,18 @@ module.exports = (app) => {
 	app.use(express.static(path.join(__dirname, "static")));
 	app.set("view engine", "ejs");
 	app.set("views", path.join(__dirname, "views"));
-	app.post("*", (req, res, next) => {	
+	/* app.post("*", (req, res, next) => {	
 		formPost.upload(req, res, (err) => {
 			if(err) {
 				console.log(err);
 			}
 			console.log("About to redirect?", req.files);
-			res.redirect('/');
+			res.redirect("/");
 		});
-	});
+	}); 
+	*/
+	app.use(formPost.middleware((err) => {
+		if(err) throw err;
+	}));
 
 };
