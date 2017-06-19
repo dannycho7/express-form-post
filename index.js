@@ -76,6 +76,15 @@ const ExpressFormPost = function(user_options = {}) {
 const storeInMemory = function(busboy, req) {
 
 	busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+
+		/*
+		 * if there is a file with the same fieldname don't attach listeners
+		 * or initialize buffer size for files
+		 * duplicate variable is local to each file
+		 */
+		var duplicate = false;
+		req.efp._data[fieldname] == undefined ? req.efp._data[fieldname] = 0 : duplicate = true;
+
 		if(!req.efp._validate || this.options.validate(fieldname, mimetype) == false) {
 			req.efp._validate == true ? (
 				req.efp._validate = false,
@@ -105,22 +114,23 @@ const storeInMemory = function(busboy, req) {
 		// init concat-stream
 		const storeMethod = require(path.join(__dirname, "lib", this.options.store));
 		const file_contents = storeMethod(uploadInfo, req, this.finished, this.handleError);
-
 		file.on("data", (data) => {
-			if(!req.efp._finished) {
-				!req.efp._data[fieldname] ? req.efp._data[fieldname] = data.length : req.efp._data[fieldname] += data.length;
+			if(!req.efp._finished && !duplicate) {
+				req.efp._data[fieldname] += data.length;
 				file_contents.write(data);
 			}
 		});
 		file.on("limit", () => {
-			this.handleError(new Error("File limit reached on file"));
+			!duplicate ? this.handleError(new Error("File limit reached on file")) : "";
 		});
 		file.on("end", () => {
+			if(duplicate) return;
+
 			if(this.options.minfileSize > req.efp._data[fieldname]) {
 				this.handleError(new Error("Uploaded file was smaller than minfileSize"));
 			}
-			if (req.efp._data[fieldname] && !file.truncated && !req.efp._finished) {
-				req._files++; // amount of files that were sent to store
+			if (req.efp._data[fieldname] > 0 && !file.truncated && !req.efp._finished) {
+				// If the file wasn't empty, truncated or efp has finished - send to store
 				file_contents.end();
 			}
 		});
@@ -132,10 +142,8 @@ const storeInMemory = function(busboy, req) {
 	});
 	busboy.on("finish", () => {
 		req.efp.busboy._finished = true;
-		if(req._files == 0) {
-			// no file was uploaded
-			return this.finished();
-		}
+		// will only do something if all files were saved in the store
+		return this.finished();
 	});
 };
 
@@ -149,11 +157,10 @@ const fileHandler = function(req, res, cb) {
 		 * _data tracks if a file field has transmitted data (or has contents). 
 		 * ^^ this is set to avoid errors with concat-stream empty buffers
 		 */
-		req.efp = { _validate: true, _finished: false, _data: [], busboy: { _finished: false }};
+		req.efp = { _validate: true, _finished: false, _data: {}, busboy: { _finished: false }};
 		req.body = {};
 		req.files = {};
-		req._files = 0; // the amount of files currently in the upload process after concatenating streams
-
+		
 		/* 
 		 * In middleware, this.finished passes on to next middleware
 		 * Validation checking in this.finished because of upload function cb not next param in middleware
@@ -167,7 +174,7 @@ const fileHandler = function(req, res, cb) {
 				req.efp._finished = true;
 				return cb(err); // only gets called when upload is being used and as handleError
 			}
-			if(Object.keys(req.files).length == req._files && req.efp.busboy._finished) {
+			if(Object.keys(req.files).length == Object.keys(req.efp._data).length && req.efp.busboy._finished) {
 				// all files that were sent to the store have been uploaded and busboy is done parsing
 				req.efp._finished = true;
 				return cb();
@@ -190,7 +197,7 @@ const fileHandler = function(req, res, cb) {
 				} 
 			) : (
 				this.handleError = () => { 
-					!req.efp._finished && req._files == 0 ? (
+					!req.efp._finished ? (
 						req.efp._finished = true, 
 						this.next() 
 					): "";
