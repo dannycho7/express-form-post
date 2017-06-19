@@ -1,7 +1,7 @@
 # Express Form Post [![npm version](https://badge.fury.io/js/express-form-post.svg)](https://badge.fury.io/js/express-form-post) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
-A simple solution to handling file and form submissions <br/>
-Note: this is not recommended for use by applications that handle large files or receives a large volume of file upload requests. This is a quick solution to any application that handle small to medium sized files intended to be an abstraction for applications whose core doesn't come from file uploading.
+#### A simple solution to handling file and form submissions
+Note: this is not recommended for use by applications that handles large files or receives a large volume of file upload requests. This is a quick solution to any application that handle small to medium sized files. This is intended to be an abstraction for applications whose core doesn't come from file uploading.
 
 ## Installation
 ```sh
@@ -10,7 +10,7 @@ $ npm install express-form-post --save
 
 ## Usage
 
-The information for the file uploaded will be available in the `files` and `body` object in the `request` object. express-form-post can be dropped in as middleware or used as a function to handle file upload. Check out the samples on the github repository for more specific usage!
+The information for the uploaded file will be available in the `files` object in the `request` object. Fields that were sent along the request will be available on the`body` object in the `request` object. express-form-post can be dropped in as middleware or used as a function to handle file upload. Check out the samples on the [github](https://github.com/dannycho7/express-form-post) repository for more specific usage!
 
 ## Quick Start
 
@@ -24,7 +24,7 @@ app.use(formPost.middleware());
 ```
 
 ## Usage as an asynchronous function
-You can also use your efp's method 'upload' instead of the middleware method. This api gives a more intuitive way to handle the upload. I would recommend using this if you want to handle errors in any sophisticated way (if you're doing something more than just logging the error).
+You can also use express-form-post's method 'upload' instead of the middleware method. It is a more intuitive way of handling the upload. I would recommend using this if you want to handle errors in any sophisticated way (if you're doing something more than just logging the error).
 
 ```javascript
 var express = require("express");
@@ -126,7 +126,7 @@ app.use(formPost.middleware(function(err) {
 }));
 ```
 
-## express-form-post API
+## API
 
 When initializing an instance of efp (express-form-post)  you can provide it different options that will change the way efp handles your file uploads. 
 
@@ -153,16 +153,16 @@ Key | Description | Note
 
 There are three different ways to handle form data with express-form-post. The three ways are available as methods in the instance of a express-form-post object.
 
-#### middleware([callback])
-This method is used as middleware and provides a good layer of abstraction for file handling. 
-
 #### upload(request, response[, callback])
 This method is used inside routes as a function rather than middleware. This allows better readability and customizability. This function takes in three parameters : request, response, and an optional callback. The request and response object should be the ones provided by express.
+
+#### middleware([callback])
+This method is used as middleware and provides a good layer of abstraction for file handling.
 
 #### fields
 This method is used to only parse the fields and ignore the files. I would recommend against using this and to use `body-parser` instead, but fields is available for those who are not looking to download multiple modules that do the same.
 
-### Configuring API storage
+### Configuring cloud storage
 
 Here are the different information you can input for each api storage. These options would go inside the api property of the options listed above.
 
@@ -186,4 +186,4 @@ Key | Description | Note
 
 #### Samples
 
-Samples are also available on the github page. Please take a look and reach out if you have any questions. [github](https://github.com/dannycho7/express-form-post)
+Samples are also available on the github page. Please take a look and reach out if you have any questions: [github](https://github.com/dannycho7/express-form-post)
