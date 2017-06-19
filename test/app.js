@@ -14,7 +14,7 @@ const formPost = efp({
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 1000000,
 	minfileSize: 1,
-	filename: function(filename, fieldname, mimetype) {
+	filename: function(originalname, fieldname, mimetype) {
 		return Date.now() +  "-" + filename;
 	},
 	validate: function(fieldname, mimetype) {
@@ -25,33 +25,35 @@ const formPost = efp({
 	}
 });
 */
+
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
-	filename: function(filename, fieldname) {
-		return fieldname + "-" + filename;
+	filename: function(originalname, fieldname) {
+		return fieldname + "-" + originalname;
 	},
-	keys: {
+	api: {
 		accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-		secretAccessKey: process.env.secretAccessKey,
+		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 		bucketName: process.env.S3_BUCKET_NAME,
 		ACL: "public-read"
 	}
 });
 
-/*
-// Usage with google drive
-const formPost = efp({
-	store: "google-drive",
-	maxfileSize: 100000,
-	filename: function(filename, fieldname, mimetype) {
 
+/*
+// Usage with dropbox
+const formPost = efp({
+	store: "dropbox",
+	filename: function(originalname, fieldname, mimetype) {
+		return "lol";
 	},
-	keys: {
-		
+	api: {
+		accessToken: process.env.dropboxAccessToken
 	}
 });
 */
+
 module.exports = (app) => {
 
 	app.use(express.static(path.join(__dirname, "static")));
@@ -69,7 +71,6 @@ module.exports = (app) => {
 	*/
 	app.use(formPost.middleware((err) => {
 		if(err) console.log(err);
-		console.log("done");
 	}));
 
 };
