@@ -248,6 +248,10 @@ const fileHandler = function(req, res, cb) {
 	}
 };
 
+ExpressFormPost.prototype.fields = function() {
+	return require("./lib/fields").bind(this);
+}
+
 ExpressFormPost.prototype.middleware = function(handleError = undefined) {
 	this.middleware.handleError = handleError; // the function to be called inside handleError
 	this.handleError = () => {}; // empty anon function to be reassigned in fileHandler
@@ -255,9 +259,10 @@ ExpressFormPost.prototype.middleware = function(handleError = undefined) {
 };
 
 // Upload function to be used within routes. handleError set as callback as well and can be check with if (err)
-ExpressFormPost.prototype.upload = function(req, res, cb) {
+ExpressFormPost.prototype.upload = function(req, res, cb = () => {}) {
+	typeof cb == "function" ? "" : cb = () => {}; // prevent user failure
 	// reassign in fileHandler
-	this.handleError = undefined; 
+	this.handleError = undefined;
 	// cb is cb in fileHandler param
 	fileHandler.bind(this)(req, res, cb);
 };

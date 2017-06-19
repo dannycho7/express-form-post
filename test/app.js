@@ -5,7 +5,7 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 const efp = require("express-form-post");
 
 // Basic usage example
-// const formPost = efp();
+const formPost = efp();
 
 /*
 // Usage for disk
@@ -41,18 +41,18 @@ const formPost = efp({
 });
 */
 
-
+/*
 // Usage with dropbox
 const formPost = efp({
 	store: "dropbox",
 	filename: function(originalname, fieldname, mimetype) {
-		return "lol";
+		return Date.now() + originalname;
 	},
 	api: {
 		accessToken: process.env.dropboxAccessToken,
 	}
 });
-
+*/
 
 module.exports = (app) => {
 
@@ -69,8 +69,6 @@ module.exports = (app) => {
 		});
 	}); 
 	*/
-	app.use(formPost.middleware((err) => {
-		if(err) console.log(err);
-	}));
+	app.use(formPost.fields());
 
 };
