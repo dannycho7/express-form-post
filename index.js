@@ -120,13 +120,8 @@ const storeInMemory = function(busboy, req) {
 		var duplicate = false;
 		req.efp._data[fieldname] == undefined ? req.efp._data[fieldname] = 0 : duplicate = true;
 
-		if(!req.efp._validateFile || this.options.validateFile(fieldname, mimetype) == false) {
-			req.efp._validateFile == true ? (
-				req.efp._validateFile = false,
-				this.handleError(new Error("Validation error by custom validateFile function"))
-			) : "";
-			return;
-		}
+		// If a file has already been invalidated don't attach listeners
+		if(!req.efp._validateFile) return;
 
 		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash
 		let save_filename = this.options.filename(originalname, fieldname, mimetype);
@@ -149,21 +144,32 @@ const storeInMemory = function(busboy, req) {
 
 		// init concat-stream
 		const file_contents = this.storeMethod(uploadInfo, req, this.finished, this.handleError);
+		let data_start = true;
 		file.on("data", (data) => {
+			if(!req.efp._validateFile || (data_start && this.options.validateFile(fieldname, mimetype) == false)) {
+				if(data_start) data_start = false;
+				req.efp._validateFile == true ? (
+					req.efp._validateFile = false,
+					this.handleError(new Error("Validation error by custom validateFile function"))
+				) : "";
+				return;
+			} else {
+				data_start = false;
+			}
 			if(!req.efp._finished && !duplicate) {
 				req.efp._data[fieldname] += data.length;
 				file_contents.write(data);
 			}
 		});
 		file.on("limit", () => {
-			!duplicate ? this.handleError(new Error("File limit reached on file")) : "";
+			!req.efp._finished && !duplicate ? this.handleError(new Error("File limit reached on file")) : "";
 		});
 		file.on("end", () => {
 			if(duplicate) return;
 			// check if this is an empty file. if so, delete it from the _data list as if it was never uploaded
 			req.efp._data[fieldname] == 0 ? delete req.efp._data[fieldname] : "";
 
-			if(this.options.minfileSize > req.efp._data[fieldname]) {
+			if(!req.efp._finished && this.options.minfileSize > req.efp._data[fieldname]) {
 				this.handleError(new Error("Uploaded file was smaller than minfileSize"));
 			}
 			if (req.efp._data[fieldname] && !file.truncated && !req.efp._finished) {
