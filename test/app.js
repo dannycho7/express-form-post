@@ -25,7 +25,7 @@ const formPost = efp({
 	}
 });
 */
-
+/*
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
@@ -39,9 +39,9 @@ const formPost = efp({
 		ACL: "public-read"
 	}
 });
+*/
 
 
-/*
 // Usage with dropbox
 const formPost = efp({
 	store: "dropbox",
@@ -49,10 +49,10 @@ const formPost = efp({
 		return "lol";
 	},
 	api: {
-		accessToken: process.env.dropboxAccessToken
+		accessToken: process.env.dropboxAccessToken,
 	}
 });
-*/
+
 
 module.exports = (app) => {
 

@@ -85,7 +85,11 @@ const ExpressFormPost = function(user_options = {}) {
 			break;
 		case "dropbox":
 			const Dropbox = require('dropbox');	
-			this.apiObject = new Dropbox({ accessToken: this.options.api.accessToken });
+			this.apiObject = new Dropbox({
+				accessToken: this.options.api.accessToken,
+				clientId: this.options.api.clientId,
+				selectUser: this.options.api.selectUser,
+			});
 			break;
 		default:
 			this.apiObject = {}; // apiObject does not init on disk
