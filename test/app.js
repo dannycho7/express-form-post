@@ -7,6 +7,7 @@ const efp = require("express-form-post");
 // Basic usage example
 // const formPost = efp();
 
+/*
 // Usage for disk
 const formPost = efp({
 	store: "disk", // Optional field; defaults to "disk-storage"
@@ -23,7 +24,7 @@ const formPost = efp({
 		return true;
 	}
 });
-/*
+*/
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
@@ -68,7 +69,7 @@ module.exports = (app) => {
 	*/
 	app.use(formPost.middleware((err) => {
 		if(err) console.log(err);
-
+		console.log("done");
 	}));
 
 };

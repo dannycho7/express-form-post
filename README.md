@@ -1,6 +1,7 @@
 # Express Form Post [![npm version](https://badge.fury.io/js/express-form-post.svg)](https://badge.fury.io/js/express-form-post) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
 A simple solution to handling file and form submissions <br/>
+Note: this is not recommended for use by applications that handle large files. This is a quick solution to any application that handle small to medium sized files.
 
 ## Installation
 ```sh
