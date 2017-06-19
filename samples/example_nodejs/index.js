@@ -36,6 +36,7 @@ app.post("/upload", (req, res, next) => {
 			return res.send("Upload unsuccessful");
 		} else {
 			console.log("I just received files", req.files);
+			console.log("I also received the fields", req.body);
 			res.send("Upload successful!");			
 		}
 	});
