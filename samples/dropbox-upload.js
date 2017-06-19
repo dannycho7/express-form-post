@@ -19,18 +19,21 @@ app.use(express.static(path.join(__dirname, "static")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-app.post("/upload", formPost.middleware((err) => {
-	if(err) console.log(err);
-}));
+app.post("/upload", formPost.middleware(), (req, res, next) => {
+	console.log("I just received files", req.files);
+	res.send("Upload successful!");
+});
 
 /* the above code is equivalent to this
 
 	app.post("/upload", (req, res, next) => {
-		formPost.upload(req, res, (err) => {
-			if(err) console.log(err);
+		formPost.upload(req, res, () => {
+			console.log("I just received files", req.files);
+			res.send("Upload successful!");
 		});
 	});
 */
+
 
 
 

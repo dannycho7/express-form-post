@@ -23,7 +23,27 @@ var formPost = efp();
 app.use(formPost.middleware());
 ```
 
-## Disk Storage
+## Usage as an asynchronous function
+You can also use your efp's method 'upload' instead of the middleware method. This api gives a more intuitive way to handle the upload. I would recommend using this if you want to handle errors in any sophisticated way (if you're doing something more than just logging the error).
+
+```javascript
+var express = require("express");
+var app = express();
+var efp = require("express-form-post");
+var formPost = efp();
+
+app.post("/upload", function(req, res, next) { 
+	formPost.upload(req, res, function(err) {
+		if(err) {
+			console.log(err);
+		}
+		console.log("My files are located here:", req.files);
+		res.redirect("/");
+	});
+}
+```
+
+## Usage with Disk Storage
 
 ```javascript
 var express = require("express");
@@ -44,10 +64,10 @@ const formPost = efp({
 	}
 });
 
-app.use(formPost.middleware(function(err) {
-	if(err) console.log(err);
-	console.log("Here are my files:", req.files);
-}));
+app.post("/upload", formPost.middleware(), function(req, res, next) {
+	console.log("I just received files", req.files);
+	res.send("Upload successful!");
+});
 ```
 
 ## Usage with aws-s3
@@ -74,10 +94,10 @@ const formPost = efp({
 	}
 })
 
-app.use(formPost.middleware(function(err) {
-	if(err) console.log(err);
-	console.log("Here are my files", req.files);
-}));
+app.post("/upload", formPost.middleware(), function(req, res, next) {
+	console.log("I just received files", req.files);
+	res.send("Upload successful!");
+});
 ```
 
 ## Usage with dropbox
@@ -104,19 +124,6 @@ app.use(formPost.middleware(function(err) {
 	if(err) console.log(err);
 	console.log("Here are my files", req.files);
 }));
-```
-
-## Usage as an asynchronous function
-```javascript
-app.post("*", (req, res, next) => { 
-	formPost.upload(req, res, (err) => {
-		if(err) {
-			console.log(err);
-		}
-		console.log("My files are located here:", req.files);
-		res.redirect("/");
-	});
-}
 ```
 
 ## express-form-post API
