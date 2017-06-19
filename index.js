@@ -6,11 +6,20 @@ const hasha = require("hasha");
 const ExpressFormPost = function(user_options = {}) {
 	if(!(this instanceof ExpressFormPost)) return new ExpressFormPost(user_options);
 
-	// validate
-	if(user_options.validate) {
-		if(typeof user_options.validate != "function") throw new Error("option 'validate' must be a function.");
+	// validateFile
+	if(user_options.validateFile) {
+		if(typeof user_options.validateFile != "function") throw new Error("option 'validateFile' must be a function.");
 	} else {
-		user_options.validate = function() { return true; };
+		user_options.validateFile = function() { return true; };
+	}
+
+	/*
+	 * validateBody validates the req.body before sending off files to the store
+	 * if validateBody is set in any way, the file buffers will be sent to the store after the request has been validated
+	 * This means that file_contents.end() only triggers after the "end" event is emitted
+	 */
+	if(user_options.validateBody && typeof user_options.validateBody != "function") {
+		throw new Error("option validateBody must be a function.");
 	}
 
 	// max file size
@@ -67,7 +76,8 @@ const ExpressFormPost = function(user_options = {}) {
 		filename: user_options.filename,
 		maxfileSize: user_options.maxfileSize,
 		minfileSize: user_options.minfileSize || 0,
-		validate: user_options.validate,
+		validateFile: user_options.validateFile,
+		validateBody: user_options.validateBody,
 		api: user_options.api
 	};
 
@@ -75,24 +85,26 @@ const ExpressFormPost = function(user_options = {}) {
 
 	// set up abi objects here so we won't have to recreate upon sending buffer to store handler
 	switch(this.options.store){
-		case "aws-s3":
-			const aws = require("aws-sdk");
-			aws.config.update({
-				accessKeyId: this.options.api.accessKeyId,
-				secretAccessKey: this.options.api.secretAccessKey,
-			});
-			this.apiObject = new aws.S3();
-			break;
-		case "dropbox":
-			const Dropbox = require('dropbox');	
-			this.apiObject = new Dropbox({
-				accessToken: this.options.api.accessToken,
-				clientId: this.options.api.clientId,
-				selectUser: this.options.api.selectUser,
-			});
-			break;
-		default:
-			this.apiObject = {}; // apiObject does not init on disk
+	case "aws-s3":{
+		let aws = require("aws-sdk");
+		aws.config.update({
+			accessKeyId: this.options.api.accessKeyId,
+			secretAccessKey: this.options.api.secretAccessKey,
+		});
+		this.apiObject = new aws.S3();
+		break;
+	}
+	case "dropbox":{
+		let Dropbox = require("dropbox");	
+		this.apiObject = new Dropbox({
+			accessToken: this.options.api.accessToken,
+			clientId: this.options.api.clientId,
+			selectUser: this.options.api.selectUser,
+		});
+		break;
+	}
+	default:
+		this.apiObject = {}; // apiObject does not init on disk
 	}
 };
 
@@ -108,10 +120,10 @@ const storeInMemory = function(busboy, req) {
 		var duplicate = false;
 		req.efp._data[fieldname] == undefined ? req.efp._data[fieldname] = 0 : duplicate = true;
 
-		if(!req.efp._validate || this.options.validate(fieldname, mimetype) == false) {
-			req.efp._validate == true ? (
-				req.efp._validate = false,
-				this.handleError(new Error("Validation error by custom validate function"))
+		if(!req.efp._validateFile || this.options.validateFile(fieldname, mimetype) == false) {
+			req.efp._validateFile == true ? (
+				req.efp._validateFile = false,
+				this.handleError(new Error("Validation error by custom validateFile function"))
 			) : "";
 			return;
 		}
@@ -155,18 +167,30 @@ const storeInMemory = function(busboy, req) {
 				this.handleError(new Error("Uploaded file was smaller than minfileSize"));
 			}
 			if (req.efp._data[fieldname] && !file.truncated && !req.efp._finished) {
-				// If the file wasn't empty, truncated or efp has finished - send to store
-				file_contents.end();
+				// If the file wasn't empty, truncated or efp has finished 
+				if(this.options.validateBody == undefined) {
+					// send to store immediately if user does not validate the request body
+					file_contents.end();
+				} else {
+					req.efp.buffers.push(file_contents);
+				}
 			}
 		});
 	});
 
 	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated) => {
 		// Possibly should add some handler for if a certain value was truncated
-		req.efp._validate && !valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
+		req.efp._validateFile && !valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
 	});
 	busboy.on("finish", () => {
 		req.efp.busboy._finished = true;
+		if(this.options.validateBody && this.options.validateBody(req.body) == false) {
+			return this.handleError("Validation failed on validateBody function");
+		} else {
+			for(var key in req.efp.buffers) {
+				req.efp.buffers[key].end();	
+			}
+		}
 		// will only do something if all files were saved in the store
 		return this.finished();
 	});
@@ -176,14 +200,14 @@ const fileHandler = function(req, res, cb) {
 	if(req.method == "POST") {
 		if(req._body) return cb();
 		/*
-		 * _validate defaults to true and becomes false if the file being uploaded is not valid
+		 * _validateFile defaults to true and becomes false if the file being uploaded is not valid
 		 * _finished is false by default and set to true if efp has "finished". Usually this just means that
 		 * the next middleware has been called already and further calls to finished and handleError does nothing
 		 * efp.busboy._finished is false by default and true if busboy is done parsing
 		 * _data tracks if a file field has transmitted data (or has contents). 
 		 * ^^ this is set to avoid errors with concat-stream empty buffers
 		 */
-		req.efp = { _validate: true, _finished: false, _data: {}, busboy: { _finished: false }};
+		req.efp = { _validateFile: true, _finished: false, _data: {}, busboy: { _finished: false }, buffers: []};
 		req.body = {};
 		req._body = true; // prevent multiple multipart middleware and body-parser from colliding
 		req.files = {};
@@ -193,6 +217,7 @@ const fileHandler = function(req, res, cb) {
 		 * Validation checking in this.finished because of upload function cb not next param in middleware
 		 * In upload function, this.finished will be the callback with an err parameter. (err be undefined)
 		 * this.finished will be called when finished with parsing the request to pass on to the cb action
+		 * buffers array holds file contents that should be sent to the store if the body is valid
 		 */
 		this.next = cb; // for middleware usage
 		this.finished = function(err) {
@@ -251,7 +276,7 @@ const fileHandler = function(req, res, cb) {
 
 ExpressFormPost.prototype.fields = function() {
 	return require("./lib/fields").bind(this);
-}
+};
 
 ExpressFormPost.prototype.middleware = function(handleError = undefined) {
 	this.middleware.handleError = handleError; // the function to be called inside handleError

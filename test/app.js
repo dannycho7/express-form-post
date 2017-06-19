@@ -4,8 +4,14 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const efp = require("express-form-post");
 
-// Basic usage example
-const formPost = efp();
+// Quick start usage (defaults to disk)
+const formPost = efp({
+	validateBody: function(data) {
+		if(data.test == "hello") {
+			return false;
+		}
+	}
+});
 
 /*
 // Usage for disk
@@ -15,13 +21,18 @@ const formPost = efp({
 	maxfileSize: 1000000,
 	minfileSize: 1,
 	filename: function(originalname, fieldname, mimetype) {
-		return Date.now() +  "-" + filename;
+		return Date.now() +  "-" + originalname;
 	},
-	validate: function(fieldname, mimetype) {
+	validateFile: function(fieldname, mimetype) {
 		if(mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
 			return false;
 		}
 		return true;
+	},
+	validateBody: function(body) {
+		if(body.test == "hello") {
+			return false;
+		}
 	}
 });
 */
@@ -37,6 +48,11 @@ const formPost = efp({
 		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 		bucketName: process.env.S3_BUCKET_NAME,
 		ACL: "public-read"
+	},
+	validateBody: function(body) {
+		if(body.test == "hello") {
+			return false;
+		}
 	}
 });
 */
@@ -49,6 +65,11 @@ const formPost = efp({
 	},
 	api: {
 		accessToken: process.env.dropboxAccessToken,
+	},
+	validateBody: function(body) {
+		if(body.test == "hello") {
+			return false;
+		}
 	}
 });
 */
@@ -68,8 +89,7 @@ module.exports = (app) => {
 		});
 	}); 
 	*/
-	app.use(formPost.middleware());
-	app.use(formPost.middleware());
-	app.use(formPost.fields());
-
+	app.use(formPost.middleware((err) => {
+		console.log(err);
+	}));
 };
