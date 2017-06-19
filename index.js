@@ -21,7 +21,7 @@ const ExpressFormPost = function(user_options = {}) {
 	}
 
 	// Available storage methods
-	if(!["disk", "aws-s3", "google-drive"].includes(user_options.store)) {
+	if(!["disk", "aws-s3", "dropbox"].includes(user_options.store)) {
 		if(user_options.store == undefined) {
 			user_options.store = "disk";
 		} else {
@@ -68,14 +68,33 @@ const ExpressFormPost = function(user_options = {}) {
 		maxfileSize: user_options.maxfileSize,
 		minfileSize: user_options.minfileSize || 0,
 		validate: user_options.validate,
-		keys: user_options.keys
+		api: user_options.api
 	};
 
+	this.storeMethod = require(path.join(__dirname, "lib", this.options.store));
+
+	// set up abi objects here so we won't have to recreate upon sending buffer to store handler
+	switch(this.options.store){
+		case "aws-s3":
+			const aws = require("aws-sdk");
+			aws.config.update({
+				accessKeyId: this.options.api.accessKeyId,
+				secretAccessKey: this.options.api.secretAccessKey,
+			});
+			this.apiObject = new aws.S3();
+			break;
+		case "dropbox":
+			const Dropbox = require('dropbox');	
+			this.apiObject = new Dropbox({ accessToken: this.options.api.accessToken });
+			break;
+		default:
+			this.apiObject = {}; // apiObject does not init on disk
+	}
 };
 
 const storeInMemory = function(busboy, req) {
 
-	busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+	busboy.on("file", (fieldname, file, originalname, encoding, mimetype) => {
 
 		/*
 		 * if there is a file with the same fieldname don't attach listeners
@@ -94,8 +113,8 @@ const storeInMemory = function(busboy, req) {
 		}
 
 		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash
-		let originalname = filename; // added for clarity on naming conventions
-		let save_filename = this.options.filename(originalname, fieldname, mimetype) || hasha(filename);
+		let save_filename = this.options.filename(originalname, fieldname, mimetype);
+		typeof save_filename == "string" && save_filename.length > 0 ? "" : save_filename = hasha(originalname);
 		save_filename.includes("/") ? (
 			this.options.directory = path.join(this.options.directory, save_filename, ".."),
 			save_filename = path.basename(path.resolve(...(save_filename.split("/"))))
@@ -108,12 +127,12 @@ const storeInMemory = function(busboy, req) {
 			fieldname: fieldname,
 			file: file,
 			encoding: encoding,
-			keys: this.options.keys
+			api: this.options.api,
+			apiObject: this.apiObject
 		};
 
 		// init concat-stream
-		const storeMethod = require(path.join(__dirname, "lib", this.options.store));
-		const file_contents = storeMethod(uploadInfo, req, this.finished, this.handleError);
+		const file_contents = this.storeMethod(uploadInfo, req, this.finished, this.handleError);
 		file.on("data", (data) => {
 			if(!req.efp._finished && !duplicate) {
 				req.efp._data[fieldname] += data.length;
@@ -125,11 +144,13 @@ const storeInMemory = function(busboy, req) {
 		});
 		file.on("end", () => {
 			if(duplicate) return;
+			// check if this is an empty file. if so, delete it from the _data list as if it was never uploaded
+			req.efp._data[fieldname] == 0 ? delete req.efp._data[fieldname] : "";
 
 			if(this.options.minfileSize > req.efp._data[fieldname]) {
 				this.handleError(new Error("Uploaded file was smaller than minfileSize"));
 			}
-			if (req.efp._data[fieldname] > 0 && !file.truncated && !req.efp._finished) {
+			if (req.efp._data[fieldname] && !file.truncated && !req.efp._finished) {
 				// If the file wasn't empty, truncated or efp has finished - send to store
 				file_contents.end();
 			}
