@@ -174,6 +174,7 @@ const storeInMemory = function(busboy, req) {
 
 const fileHandler = function(req, res, cb) {
 	if(req.method == "POST") {
+		if(req._body) return cb();
 		/*
 		 * _validate defaults to true and becomes false if the file being uploaded is not valid
 		 * _finished is false by default and set to true if efp has "finished". Usually this just means that
@@ -184,6 +185,7 @@ const fileHandler = function(req, res, cb) {
 		 */
 		req.efp = { _validate: true, _finished: false, _data: {}, busboy: { _finished: false }};
 		req.body = {};
+		req._body = true; // prevent multiple multipart middleware and body-parser from colliding
 		req.files = {};
 		
 		/* 
@@ -230,7 +232,6 @@ const fileHandler = function(req, res, cb) {
 			)
 		) : this.handleError = this.finished;
 
-		if(req._body) return this.finished();
 		try {
 			var busboy = new Busboy({ 
 				headers: req.headers,

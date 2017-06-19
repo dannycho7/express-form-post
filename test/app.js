@@ -40,7 +40,6 @@ const formPost = efp({
 	}
 });
 */
-
 /*
 // Usage with dropbox
 const formPost = efp({
@@ -69,6 +68,8 @@ module.exports = (app) => {
 		});
 	}); 
 	*/
+	app.use(formPost.middleware());
+	app.use(formPost.middleware());
 	app.use(formPost.fields());
 
 };
