@@ -6,8 +6,13 @@ const efp = require("express-form-post");
 
 // Quick start usage (defaults to disk)
 const formPost = efp({
-	validateBody: function(data) {
-		if(data.test == "hello") {
+	validateFile: function(fieldname, mimetype) {
+		if(mimetype != "application/pdf") {
+			return false;
+		}
+	},
+	validateBody: function(body) {
+		if(body.test == "hello") {
 			return false;
 		}
 	}

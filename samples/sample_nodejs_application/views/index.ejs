@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test for express-form-post</title>
+</head>
+<style type="text/css">
+	html, body {
+		margin: 0;
+	}
+	body {
+		text-align: center;
+		width: 100%;
+	}
+	form {
+		width: 30%;
+		display: inline-block;
+	}
+	input {
+		width: 100%;
+		margin: 10px;
+	}
+</style>
+<body>
+	<h1>Submit this form!</h1>
+	<form method="POST" enctype="multipart/form-data" action="/upload">
+		<label for="name">Name:</label> <input type="text" name="name" />
+		<input type="file" name="file1" />
+		<input type="file" name="file2" />
+		<button type="submit">Submit</button>
+	</form>
+</body>
+</html>

@@ -187,12 +187,12 @@ const formPost = efp({
 });
 ```
 
-#### validateFile(originalname, fieldname, mimetype)
+#### validateFile(fieldname, mimetype)
 The validateFile method validates the file data itself. An example use case would be checking if the file is a pdf. This particular example is listed below.
 
 ```javascript
 const formPost = efp({
-	validateFile: function(originalname, fieldname, mimetype) {
+	validateFile: function(fieldname, mimetype) {
 		if(mimetype != "application/pdf") {
 			return false;
 		}

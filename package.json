@@ -1,6 +1,6 @@
 {
   "name": "express-form-post",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "Simple, reliable express http file and post body handler.",
   "main": "index.js",
   "scripts": {
