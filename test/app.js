@@ -84,7 +84,7 @@ module.exports = (app) => {
 	app.use(express.static(path.join(__dirname, "static")));
 	app.set("view engine", "ejs");
 	app.set("views", path.join(__dirname, "views"));
-	/* app.post("*", (req, res, next) => {	
+	app.post("*", (req, res) => {	
 		formPost.upload(req, res, (err) => {
 			if(err) {
 				console.log(err);
@@ -93,8 +93,8 @@ module.exports = (app) => {
 			res.redirect("/");
 		});
 	}); 
-	*/
-	app.use(formPost.middleware((err) => {
+	
+	/* app.use(formPost.middleware((err) => {
 		console.log(err);
-	}));
+	})); */
 };

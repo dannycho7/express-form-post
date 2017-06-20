@@ -108,7 +108,7 @@ const ExpressFormPost = function(user_options = {}) {
 	}
 };
 
-const storeInMemory = function(busboy, req) {
+ExpressFormPost.prototype._storeInMemory = function(busboy, req) {
 
 	busboy.on("file", (fieldname, file, originalname, encoding, mimetype) => {
 
@@ -202,7 +202,7 @@ const storeInMemory = function(busboy, req) {
 	});
 };
 
-const fileHandler = function(req, res, cb) {
+ExpressFormPost.prototype._fileHandler = function(req, res, cb) {
 	if(req.method == "POST") {
 		if(req._body) return cb();
 		/*
@@ -270,7 +270,7 @@ const fileHandler = function(req, res, cb) {
 					fileSize: this.options.maxfileSize
 				}
 			});
-			storeInMemory.bind(this)(busboy, req);
+			this._storeInMemory(busboy, req);
 			req.pipe(busboy);
 		} catch(err) {
 			this.handleError(err);
@@ -287,7 +287,12 @@ ExpressFormPost.prototype.fields = function() {
 ExpressFormPost.prototype.middleware = function(handleError = undefined) {
 	this.middleware.handleError = handleError; // the function to be called inside handleError
 	this.handleError = () => {}; // empty anon function to be reassigned in fileHandler
-	return fileHandler.bind(this); // fileHandler will be called in app.use as (req, res, cb)
+	/*
+	 * fileHandler will be called in app.use as (req, res, cb)
+	 * binding this to the return value because when it is used in the express middleware _filehandler loses this context
+	 * the value of _fileHandler the function is being used to call rather than the function itself
+	 */
+	return this._fileHandler.bind(this);
 };
 
 // Upload function to be used within routes. handleError set as callback as well and can be check with if (err)
@@ -296,7 +301,7 @@ ExpressFormPost.prototype.upload = function(req, res, cb = () => {}) {
 	// reassign in fileHandler
 	this.handleError = undefined;
 	// cb is cb in fileHandler param
-	fileHandler.bind(this)(req, res, cb);
+	this._fileHandler(req, res, cb);
 };
 
 
