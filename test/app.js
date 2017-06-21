@@ -4,8 +4,13 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const efp = require("express-form-post");
 
+
 // Quick start usage (defaults to disk)
 const formPost = efp({
+	directory: path.join(__dirname, "tmp"),
+	filename: function(originalname, fieldname, mimetype) {
+		return Date.now() + "-" + originalname;
+	},
 	validateFile: function(fieldname, mimetype) {
 		if(mimetype != "application/pdf") {
 			return false;
@@ -17,6 +22,7 @@ const formPost = efp({
 		}
 	}
 });
+
 
 /*
 // Usage for disk
@@ -84,13 +90,12 @@ module.exports = (app) => {
 	app.use(express.static(path.join(__dirname, "static")));
 	app.set("view engine", "ejs");
 	app.set("views", path.join(__dirname, "views"));
-	app.post("*", (req, res) => {	
+	app.post("*", (req, res, next) => {	
 		formPost.upload(req, res, (err) => {
 			if(err) {
 				console.log(err);
 			}
-			console.log("About to redirect?", req.files);
-			res.redirect("/");
+			next();
 		});
 	}); 
 	
