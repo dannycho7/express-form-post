@@ -13,15 +13,17 @@ const formPost = efp({
 	filename: function(originalname, fieldname, mimetype) {
 		return Date.now() + originalname;
 	},
-	validateBody: function(body) {
+	validateBody: function(cb, body) {
 		if(body.name == "henry") {
-			return false;
+			return cb(false);
 		}
+		cb();
 	},
-	validateFile: function(fieldname, mimetype) {
+	validateFile: function(cb, fieldname, mimetype) {
 		if(mimetype != "application/pdf") {
-			return false;
+			return cb(false);
 		}
+		cb();
 	}
 });
 

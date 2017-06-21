@@ -4,6 +4,7 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const efp = require("express-form-post");
 
+
 /*
 // Quick start usage (defaults to disk)
 const formPost = efp({
@@ -11,15 +12,17 @@ const formPost = efp({
 	filename: function(originalname, fieldname, mimetype) {
 		return Date.now() + "-" + originalname;
 	},
-	validateFile: function(fieldname, mimetype) {
+	validateFile: function(cb, fieldname, mimetype) {
 		if(mimetype != "application/pdf") {
-			return false;
+			return cb(false);
 		}
+		return cb();
 	},
-	validateBody: function(body) {
+	validateBody: function(cb, body) {
 		if(body.test == "hello") {
-			return false;
+			return cb(false);
 		}
+		return cb();
 	}
 });
 */
@@ -36,14 +39,15 @@ const formPost = efp({
 	},
 	validateFile: function(fieldname, mimetype) {
 		if(mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-			return false;
+			return cb(false);
 		}
-		return true;
+		return cb();
 	},
 	validateBody: function(body) {
 		if(body.test == "hello") {
-			return false;
+			return cb(false);
 		}
+		cb();
 	}
 });
 */
@@ -51,7 +55,7 @@ const formPost = efp({
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
-	maxfileSize: 10000,
+	maxfileSize: 100000,
 	filename: function(originalname, fieldname) {
 		return fieldname + "-" + originalname;
 	},
@@ -61,9 +65,11 @@ const formPost = efp({
 		bucketName: process.env.S3_BUCKET_NAME,
 		ACL: "public-read"
 	},
-	validateBody: function(body) {
+	validateBody: function(cb, body) {
 		if(body.test == "hello") {
-			return false;
+			return cb(false);
+		} else {
+			return cb();
 		}
 	}
 });
@@ -79,7 +85,9 @@ const formPost = efp({
 	},
 	validateBody: function(body) {
 		if(body.test == "hello") {
-			return false;
+			return cb(false);
+		} else {
+			return cb();
 		}
 	}
 });

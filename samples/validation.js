@@ -17,10 +17,11 @@ const formPost = efp({
 			return false;
 		}
 	},
-	validateFile: function(fieldname, mimetype) {
+	validateFile: function(cb, fieldname, mimetype) {
 		if(mimetype != "application/pdf") {
-			return false;
+			return cb(false);
 		}
+		cb();
 	},
 	api: {
 		accessKeyId: process.env.AWS_ACCESS_KEY_ID,

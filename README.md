@@ -23,7 +23,7 @@ var formPost = efp();
 app.use(formPost.middleware());
 ```
 
-## Usage as an asynchronous function
+## Usage as an asynchronous function (Highly Recommended)
 You can also use express-form-post's method 'upload' instead of the middleware method. It is a more intuitive way of handling the upload. I would recommend using this if you want to handle errors in any sophisticated way (if you're doing something more than just logging the error).
 
 ```javascript
@@ -56,17 +56,19 @@ const formPost = efp({
 	filename: function(originalname, fieldname, mimetype) {
 		return Date.now() + "-" + originalname;
 	},
-	validate: function(fieldname, originalname, mimetype) {
+	validateFile: function(cb, fieldname, mimetype) {
 		console.log(mimetype);
 		if(mimetype != "application/pdf") {
-			return false;
+			return cb(false);
 		}
+		return cb();
 	},
-	validateBody: function(body) {
+	validateBody: function(cb, body) {
 		// validates password length before uploading file
 		if(body.password.length > 7) {
-			return false;
+			return cb(false);
 		}
+		cb();
 	}
 });
 
@@ -155,16 +157,20 @@ Key | Description | Note
 
 One of the advantages of using express-form-post to handle file uploads is the validation api. There are two (optional) validation methods available during setup: validateFile and validateBody. <br/>
 
-Both validate functions were designed to be an intuitive way to create conditional file handling. In order to invalidate a request/file upload, you just need to return false. Examples are listed below.
+If specifying a validation method property, you must call the callback argument or your file will go unhandled.
 
-#### validateBody(body)
+Both validate functions were designed to be an intuitive way to create conditional file handling. In order to invalidate a request/file upload, you just need to return the callback with the argument false. Examples are listed below.
+
+#### validateBody(callback, body)
 The validateBody method validates the request's body before sending off your file to the specified store. This is especially helpful for handling signups that require uploading some type of file (e.g a resume). For example, if the user signs up without filling in the proper fields, you can cancel the file upload (saves api requests and creates faster responses for errors). Here is an example with validating that a field called 'username' was sent.
+
 ```javascript
 const formPost = efp({
-	validateBody: function(body) {
+	validateBody: function(cb, body) {
 		if(body.username == undefined) {
-			return false;
+			return cb(false);
 		}
+		cb();
 	}
 });
 ```
@@ -176,7 +182,9 @@ The validateFile method validates the file data itself. An example use case woul
 const formPost = efp({
 	validateFile: function(fieldname, mimetype) {
 		if(mimetype != "application/pdf") {
-			return false;
+			return cb(false);
+		} else {
+			cb();
 		}
 	}
 });
