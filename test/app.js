@@ -52,6 +52,7 @@ const formPost = efp({
 });
 */
 
+/*
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
@@ -73,7 +74,9 @@ const formPost = efp({
 		}
 	}
 });
-/*
+*/
+
+
 // Usage with dropbox
 const formPost = efp({
 	store: "dropbox",
@@ -83,7 +86,7 @@ const formPost = efp({
 	api: {
 		accessToken: process.env.dropboxAccessToken,
 	},
-	validateBody: function(body) {
+	validateBody: function(cb, body) {
 		if(body.test == "hello") {
 			return cb(false);
 		} else {
@@ -91,7 +94,7 @@ const formPost = efp({
 		}
 	}
 });
-*/
+
 
 module.exports = (app) => {
 
