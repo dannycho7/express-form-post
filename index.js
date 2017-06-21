@@ -10,7 +10,7 @@ const ExpressFormPost = function(user_options = {}) {
 	if(user_options.validateFile) {
 		if(typeof user_options.validateFile != "function") throw new Error("option 'validateFile' must be a function.");
 	} else {
-		user_options.validateFile = function() { return true; };
+		user_options.validateFile = (handlePromise) => handlePromise();
 	}
 
 	/*
@@ -18,8 +18,12 @@ const ExpressFormPost = function(user_options = {}) {
 	 * if validateBody is set in any way, the file buffers will be sent to the store after the request has been validated
 	 * This means that file_contents.end() only triggers after the "end" event is emitted
 	 */
-	if(user_options.validateBody && typeof user_options.validateBody != "function") {
-		throw new Error("option validateBody must be a function.");
+	if(user_options.validateBody) {
+		if(typeof user_options.validateBody != "function") {
+			throw new Error("option validateBody must be a function.");
+		}
+	} else {
+		user_options.validateBody = (handlePromise) => handlePromise();
 	}
 
 	// max file size
@@ -58,15 +62,11 @@ const ExpressFormPost = function(user_options = {}) {
 		switch(user_options.filename) {
 		case undefined:
 		case "": 
-			user_options.filename = function(originalname) {
-				return hasha(originalname);
-			};
+			user_options.filename = (originalname) => { return hasha(originalname); };
 			break;
 		default:
 			var user_input = user_options.filename; // Closures are awesome
-			user_options.filename = function() {
-				return user_input;
-			};
+			user_options.filename = () => { return user_input; };
 		}
 	}
 
@@ -108,98 +108,99 @@ const ExpressFormPost = function(user_options = {}) {
 	}
 };
 
-ExpressFormPost.prototype._storeInMemory = function(busboy, req) {
+ExpressFormPost.prototype._attachListeners = function(busboy, req) {
 
 	busboy.on("file", (fieldname, file, originalname, encoding, mimetype) => {
 		// emit 'end' event on file skip attaching listeners
-		if(originalname == "" || req.efp._finished || !req.efp._validFile) return file.resume();
+		if(originalname == "" || req.efp._finished || req.efp._data[fieldname] != undefined) return file.resume();
 
-		/*
-		 * if there is a file with the same fieldname don't attach listeners
-		 * or initialize buffer size for files
-		 * duplicate variable is local to each file
-		 */
-		var duplicate = false;
-		req.efp._data[fieldname] == undefined ? req.efp._data[fieldname] = 0 : duplicate = true;
-
-		// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash
-		let save_filename = this.options.filename(originalname, fieldname, mimetype);
-		typeof save_filename == "string" && save_filename.length > 0 ? "" : save_filename = hasha(originalname);
-		save_filename.includes("/") ? (
-			this.options.directory = path.join(this.options.directory, save_filename, ".."),
-			save_filename = path.basename(path.resolve(...(save_filename.split("/"))))
-		): "";
-
-		let uploadInfo = {
-			directory: this.options.directory,
-			filename: save_filename,
-			mimetype: mimetype,
-			fieldname: fieldname,
-			file: file,
-			encoding: encoding,
-			api: this.options.api,
-			apiObject: this.apiObject
-		};
-
-		// init duplex stream (read/writable) or concat-stream depending on store method
-		const file_contents = this.storeMethod(uploadInfo, req, this.finished, this.handleError);
-		req.efp.streams.push(file_contents);
-		let data_start = true;
-		file.on("data", (data) => {
-			if(!req.efp._validFile || (data_start && this.options.validateFile(fieldname, mimetype) == false)) {
-				req.efp._validFile == true ? (
-					req.efp._validFile = false,
-					this.removeUploadedFiles(),
-					this.handleError(new Error("Validation error by custom validateFile function"))
-				) : "";
-				return;
-			}
-			if(!req.efp._finished && !duplicate) {
-				req.efp._data[fieldname] += data.length;
-				file_contents.write(data);
-			}
-		});
-
-		file.once("data", (data) => data_start = false);
-
+		// Busboy emits limit event before my file listeners can reach it
 		file.on("limit", () => {
-			!req.efp._finished && !duplicate ? (
-				this.removeUploadedFiles(),
+			!req.efp._finished ? (
+				this.removeUploads(),
 				this.handleError(new Error("File limit reached on file"))
 			): "";
 		});
-		file.on("end", () => {
-			if(duplicate) return;
 
+		file.on("end", () => {
 			if(!req.efp._finished && this.options.minfileSize > req.efp._data[fieldname]) {
-				this.removeUploadedFiles();
+				this.removeUploads();
 				this.handleError(new Error("Uploaded file was smaller than minfileSize"));
 			}
-			if (req.efp._data[fieldname] && !file.truncated && !req.efp._finished) {
-				// If the file wasn't empty, truncated or efp has finished 
-				if(this.options.validateBody == undefined) {
-					file_contents.end();
+		});
+
+		new Promise((resolve, reject) => {
+			// handlePromise is cb in function declaration
+			const handlePromise = (valid) => {
+				valid == false ? reject((new Error("Validation error by custom validateFile function"))) : (
+					resolve()
+				);
+			};
+			this.options.validateFile(handlePromise, fieldname, mimetype);
+		})
+		.then(() => {
+			// user may use filename function but incorrectly return nothing. no warning supplied. defaults to hash
+			let save_filename = this.options.filename(originalname, fieldname, mimetype);
+			typeof save_filename == "string" && save_filename.length > 0 ? "" : save_filename = hasha(originalname);
+			save_filename.includes("/") ? (
+				this.options.directory = path.join(this.options.directory, save_filename, ".."),
+				save_filename = path.basename(path.resolve(...(save_filename.split("/"))))
+			): "";
+
+			let uploadInfo = {
+				directory: this.options.directory,
+				filename: save_filename,
+				mimetype: mimetype,
+				fieldname: fieldname,
+				file: file,
+				encoding: encoding,
+				api: this.options.api,
+				apiObject: this.apiObject
+			};
+
+			// init duplex stream (read/writable) or concat-stream depending on store method
+			const file_contents = this.storeMethod(uploadInfo, req, this.finished, this.handleError);
+			req.efp.streams.push(file_contents);
+			req.efp._data[fieldname] = 0; // initialize the stream size tracker
+
+			file.on("data", (data) => {
+				if(!req.efp._finished) {
+					req.efp._data[fieldname] += data.length;
+					file_contents.write(data);
 				}
-			}
+			});
+
+		})
+		.catch((err) => {
+			this.removeUploads();
+			this.handleError(err);
+			return file.resume(); // emit 'end' event on file for busboy 'finish' prevents infinite piping for req
 		});
 	});
 
 	busboy.on("field", (fieldname, val, fieldnameTruncated, valTruncated) => {
 		// Possibly should add some handler for if a certain value was truncated
-		req.efp._validFile && !valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
+		!req.efp._finished && !valTruncated && !fieldnameTruncated ? req.body[fieldname] = val : "";
 	});
 	busboy.on("finish", () => {
 		req.efp.busboy._finished = true;
-		if(this.options.validateBody && this.options.validateBody(req.body) == false) {
-			this.removeUploadedFiles();
-			return this.handleError("Validation failed on validateBody function");
-		} else {
+		if(req.efp._finished) return;
+		new Promise((resolve, reject) => {
+			const handlePromise = (flag) => {
+				flag == false ? reject(new Error("Validation failed on validateBody function")) : resolve();
+			};
+			this.options.validateBody(handlePromise, req.body);
+		})
+		.then(() => {
 			for(var key in req.efp.streams) {
 				req.efp.streams[key].end();
 			}
-		}
-		// will only do something if all files were saved in the store
-		return this.finished();
+			return this.finished(); // If there was no files this triggers properly, otherwise it is called when ending streams
+		})
+		.catch((err) => {
+			this.removeUploads();
+			return this.handleError(err);
+		});
 	});
 };
 
@@ -241,12 +242,13 @@ ExpressFormPost.prototype._fileHandler = function(req, res, cb) {
 		};
 
 		// make sure this is called before handleError call
-		this.removeUploadedFiles = function() {
+		this.removeUploads = function() {
 			if(req.efp._finished) return;
+			req.body = {};
 			for(var key in req.efp.streams) {
 				req.efp.streams[key].emit("destroy");
 			}
-		}
+		};
 
 		/*
 		 * A call to this.handleError will nullify any subsequent calls to this.finished and this.handleError
@@ -280,7 +282,7 @@ ExpressFormPost.prototype._fileHandler = function(req, res, cb) {
 					fileSize: this.options.maxfileSize
 				}
 			});
-			this._storeInMemory(busboy, req);
+			this._attachListeners(busboy, req);
 			req.pipe(busboy);
 		} catch(err) {
 			this.handleError(err);
