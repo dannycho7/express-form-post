@@ -4,7 +4,7 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const efp = require("express-form-post");
 
-
+/*
 // Quick start usage (defaults to disk)
 const formPost = efp({
 	directory: path.join(__dirname, "tmp"),
@@ -22,7 +22,7 @@ const formPost = efp({
 		}
 	}
 });
-
+*/
 
 /*
 // Usage for disk
@@ -47,10 +47,11 @@ const formPost = efp({
 	}
 });
 */
-/*
+
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
+	maxfileSize: 10000,
 	filename: function(originalname, fieldname) {
 		return fieldname + "-" + originalname;
 	},
@@ -66,7 +67,6 @@ const formPost = efp({
 		}
 	}
 });
-*/
 /*
 // Usage with dropbox
 const formPost = efp({

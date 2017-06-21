@@ -3,7 +3,6 @@ const app = express();
 require("../app")(app); // Initializing middleware
 
 app.get("*", (req, res) => {
-	console.log("Rendering index", req.url);
 	res.render("index");
 });
 
