@@ -1,7 +1,10 @@
 # Express Form Post [![npm version](https://badge.fury.io/js/express-form-post.svg)](https://badge.fury.io/js/express-form-post) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
-#### A simple solution to handling file and form submissions
-express-form-post was designed to become a central module primarily to abstract away setting up file uploads for aws-s3 and dropbox storage apis. This api streams buffer data to endpoints and can even validate the request's body before deciding to save the file. Works great for any application that needs signups or works with file uploads!
+**A simple solution to handling file and form submissions**
+
+express-form-post was designed primarily to abstract away setting up file uploads for aws-s3 and dropbox storage apis, but can also **validate the entire request body** before deciding to save the file, allowing you to save api requests during validation. 
+
+This api pipes buffer streams to api endpoints making it a very fast and memory efficient file uploader. It works great for any application that needs signups or works with file uploads!
 
 **Note: This module works in any node.js setting. Express is not required for usage.**
 

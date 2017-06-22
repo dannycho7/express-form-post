@@ -1,6 +1,6 @@
 {
   "name": "express-form-post",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "Simple, reliable express http file and post body handler.",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,12 @@
     "aws",
     "s3",
     "disk",
-    "dropbox"
+    "dropbox",
+    "validate",
+    "signup",
+    "validation",
+    "request",
+    "body"
   ],
   "author": "Danny Cho (dannycho7)",
   "license": "ISC",
