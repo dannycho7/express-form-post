@@ -3,6 +3,8 @@
 #### A simple solution to handling file and form submissions
 express-form-post was designed to become a central module primarily to abstract away setting up file uploads for aws-s3 and dropbox storage apis. This api streams buffer data to endpoints and can even validate the request's body before deciding to save the file. Works great for any application that needs signups or works with file uploads!
 
+**Note: This module works in any node.js setting. Express is not required for usage.**
+
 ## Installation
 ```sh
 $ npm install express-form-post --save
@@ -12,7 +14,7 @@ $ npm install express-form-post --save
 
 The information for the uploaded file will be available in the `files` object in the `request` object. Fields that were sent along the request will be available on the`body` object in the `request` object. express-form-post can be dropped in as middleware or used as a function to handle file upload. Check out the samples on the [github](https://github.com/dannycho7/express-form-post) repository for more specific usage!
 
-## Quick Start
+## Quick Start with express
 
 ```javascript
 var express = require("express");
@@ -25,6 +27,8 @@ app.use(formPost.middleware());
 
 ## Usage as an asynchronous function (Highly Recommended)
 You can also use express-form-post's method 'upload' instead of the middleware method. It is a more intuitive way of handling the upload. I would recommend using this if you want to handle errors in any sophisticated way (if you're doing something more than just logging the error).
+
+**This allows you to use express-form-post without express routing**
 
 ```javascript
 var express = require("express");
@@ -111,7 +115,7 @@ app.post("/upload", formPost.middleware(), function(req, res, next) {
 ## Usage with dropbox
 
 ```sh
-$ npm install dropbox --save
+$ npm install dropbox-stream --save
 ```
 
 ```javascript

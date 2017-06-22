@@ -1,10 +1,10 @@
 {
   "name": "express-form-post",
-  "version": "1.0.25",
+  "version": "1.0.27",
   "description": "Simple, reliable express http file and post body handler.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "start": "node test/bin/server.js",
     "start:dev": "nodemon test/bin/server.js"
   },
@@ -36,13 +36,15 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.56.0",
+    "concat-stream": "^1.6.0",
     "dotenv": "^4.0.0",
     "dropbox": "^2.5.4",
     "dropbox-stream": "^1.0.5",
     "ejs": "^2.5.6",
     "eslint": "^3.19.0",
     "express": "^4.15.3",
-    "nodemon": "^1.11.0",
-    "concat-stream": "^1.6.0"
+    "form-data": "^2.2.0",
+    "mocha": "^3.4.2",
+    "nodemon": "^1.11.0"
   }
 }
