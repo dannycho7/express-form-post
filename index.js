@@ -122,13 +122,6 @@ ExpressFormPost.prototype._attachListeners = function(busboy, req) {
 			): "";
 		});
 
-		file.on("end", () => {
-			if(!req.efp._finished && this.options.minfileSize > req.efp._data[fieldname]) {
-				this.removeUploads();
-				this.handleError(new Error("Uploaded file was smaller than minfileSize"));
-			}
-		});
-
 		new Promise((resolve, reject) => {
 			// handlePromise is cb in function declaration
 			const handlePromise = (valid) => {
@@ -161,7 +154,7 @@ ExpressFormPost.prototype._attachListeners = function(busboy, req) {
 			// init duplex stream (read/writable) or concat-stream depending on store method
 			this.storeMethod(uploadInfo, req, this.finished, this.handleError)
 			.then((file_contents) => {
-				req.efp.streams.push(file_contents);
+				req.efp.streams[fieldname] = file_contents;
 				req.efp._data[fieldname] = 0; // initialize the stream size tracker
 
 				file.on("data", (data) => {
@@ -198,7 +191,12 @@ ExpressFormPost.prototype._attachListeners = function(busboy, req) {
 			this.options.validateBody(handlePromise, req.body);
 		})
 		.then(() => {
+			// streams and _data use the same keys and map to different info of same file
 			for(var key in req.efp.streams) {
+				if(this.options.minfileSize > req.efp._data[key]) {
+					this.removeUploads();
+					return this.handleError(new Error("Uploaded file was smaller than minfileSize"));
+				}
 				req.efp.streams[key].end();
 			}
 			return this.finished(); // If there was no files this triggers properly, otherwise it is called when ending streams
@@ -218,10 +216,9 @@ ExpressFormPost.prototype._fileHandler = function(req, res, cb) {
 		 * _finished is false by default and set to true if efp has "finished". Usually this just means that
 		 * the next middleware has been called already and further calls to finished and handleError does nothing
 		 * efp.busboy._finished is false by default and true if busboy is done parsing
-		 * _data tracks if a file field has transmitted data (or has contents). 
-		 * ^^ this is set to avoid errors with concat-stream empty buffers
+		 * _data tracks the amount of data the file with that key has currently uploaded to the stream
 		 */
-		req.efp = { _validFile: true, _finished: false, _data: {}, busboy: { _finished: false }, streams: []};
+		req.efp = { _validFile: true, _finished: false, _data: {}, busboy: { _finished: false }, streams: {}};
 		req.body = {};
 		req._body = true; // prevent multiple multipart middleware and body-parser from colliding
 		req.files = {};

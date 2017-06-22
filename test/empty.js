@@ -82,6 +82,40 @@ describe("Submitting empty form data", () => {
 				});
 			});
 		});
+
+		it("Uploading empty file with minfileSize greater than 0", (done) => {
+			// http://localhost:5000
+			createServer({
+				minfileSize: 10,
+				directory: path.join(__dirname, "tmp", "minUpload"),
+				filename: function(originalname, fieldname) {
+					return fieldname + "-" + originalname;
+				}
+			}, () => {
+				var form = new FormData();
+				form.append("empty", fs.createReadStream(path.join(__dirname, "files/empty.txt")));
+				form.append("medium_image", fs.createReadStream(path.join(__dirname, "files/medium_image.jpg")));
+				form.submit("http://localhost:5000", (err, res) => {
+					let data = "";
+					res.on("data", (chunk) => {
+						data += chunk;
+					});
+					res.on("end", () => {
+						let req = JSON.parse(data);
+						assert.equal(Object.keys(req.files).length, 0);
+						assert.equal(Object.keys(req.body).length, 0);
+						fs.stat(path.join(__dirname, "tmp/minUpload", "empty.txt"), (err, stats) => {
+							if(err) {
+								return done(); // file doesn't exist
+							} else if(stats.isFile()){
+								return done(new Error("File did not get deleted"));
+							}
+							return done();
+						});
+					}); 
+				});
+			});
+		});
 	});
 
 })

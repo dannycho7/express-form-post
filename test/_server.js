@@ -10,7 +10,7 @@ module.exports = (opts, selfRequest) => {
 
 	server.on("request", (req, res) => {
 		formPost.upload(req, res, (err) => {
-			if(err) return console.log(err);
+			if(err) console.log("Error printed by server:", err);
 			let responseJSON = {
 				files: req.files,
 				body: req.body

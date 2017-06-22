@@ -6,7 +6,8 @@ const efp = require("express-form-post");
 
 // Quick start usage (defaults to disk)
 const formPost = efp({
-	directory: "tmp"
+	directory: path.join(__dirname, "tmp"),
+	minfileSize: 10
 });
 
 /*
