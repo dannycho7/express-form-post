@@ -1,3 +1,4 @@
+/* eslint-env node, mocha */
 /* Creating a one time request server which closes as soon as it gets one request */
 /* Response will always be the req object so we can just check the req body and req files */
 
@@ -14,8 +15,8 @@ module.exports = (opts, selfRequest) => {
 			let responseJSON = {
 				files: req.files,
 				body: req.body
-			}
-			res.writeHead(200, { Connection: 'close' });
+			};
+			res.writeHead(200, { Connection: "close" });
 			res.end(JSON.stringify(responseJSON));
 			server.close();
 		});
@@ -23,4 +24,4 @@ module.exports = (opts, selfRequest) => {
 
 	server.listen(5000, () => {});
 	selfRequest(); // uses form-data api to send a request to this server
-}
+};

@@ -1,3 +1,5 @@
+/* eslint-env node, mocha */
+
 const assert = require("assert");
 const createServer = require("./_server");
 const FormData = require("form-data");
@@ -118,4 +120,4 @@ describe("Submitting empty form data", () => {
 		});
 	});
 
-})
+});
