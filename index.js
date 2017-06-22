@@ -111,10 +111,10 @@ const ExpressFormPost = function(user_options = {}) {
 
 ExpressFormPost.prototype._fileHandler = function(req, res, cb) {
 	fileHandler.bind(this)(req, res, cb);
-}
+};
 ExpressFormPost.prototype._attachListeners = function(busboy, req) {
 	attachListeners.bind(this)(busboy, req);
-}
+};
 
 ExpressFormPost.prototype.fields = function() {
 	return require("./lib/fields").bind(this);
