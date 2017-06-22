@@ -159,16 +159,22 @@ ExpressFormPost.prototype._attachListeners = function(busboy, req) {
 			};
 
 			// init duplex stream (read/writable) or concat-stream depending on store method
-			const file_contents = this.storeMethod(uploadInfo, req, this.finished, this.handleError);
-			req.efp.streams.push(file_contents);
-			req.efp._data[fieldname] = 0; // initialize the stream size tracker
+			this.storeMethod(uploadInfo, req, this.finished, this.handleError)
+			.then((file_contents) => {
+				req.efp.streams.push(file_contents);
+				req.efp._data[fieldname] = 0; // initialize the stream size tracker
 
-			file.on("data", (data) => {
-				if(!req.efp._finished) {
-					req.efp._data[fieldname] += data.length;
-					file_contents.write(data);
-				}
-			});
+				file.on("data", (data) => {
+					if(!req.efp._finished) {
+						req.efp._data[fieldname] += data.length;
+						file_contents.write(data);
+					}
+				});
+			})
+			.catch((err) => {
+				this.handleError(err);
+			})
+			
 
 		})
 		.catch((err) => {
