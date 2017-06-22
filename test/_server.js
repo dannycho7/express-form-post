@@ -4,13 +4,13 @@
 const http = require("http");
 const efp = require("../index.js");
 
-module.exports = (done, opts, selfRequest) => {
+module.exports = (opts, selfRequest) => {
 	var server = http.createServer();
 	const formPost = new efp(opts);
 
 	server.on("request", (req, res) => {
 		formPost.upload(req, res, (err) => {
-			if(err) return done(err);
+			if(err) return console.log(err);
 			let responseJSON = {
 				files: req.files,
 				body: req.body
