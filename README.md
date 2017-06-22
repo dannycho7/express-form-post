@@ -14,7 +14,7 @@ $ npm install express-form-post --save
 
 The information for the uploaded file will be available in the `files` object in the `request` object. Fields that were sent along the request will be available on the`body` object in the `request` object. express-form-post can be dropped in as middleware or used as a function to handle file upload. Check out the samples on the [github](https://github.com/dannycho7/express-form-post) repository for more specific usage!
 
-## Quick Start with express
+## Quick Start with express.js
 
 ```javascript
 var express = require("express");
