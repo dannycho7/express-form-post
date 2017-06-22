@@ -4,13 +4,12 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const efp = require("express-form-post");
 
-
 /*
 // Quick start usage (defaults to disk)
 const formPost = efp({
 	directory: path.join(__dirname, "tmp"),
 	filename: function(originalname, fieldname, mimetype) {
-		return Date.now() + "-" + originalname;
+		return Date.now() + mimetype + "-" + originalname;
 	},
 	validateFile: function(cb, fieldname, mimetype) {
 		if(mimetype != "application/pdf") {
@@ -76,7 +75,6 @@ const formPost = efp({
 });
 */
 
-
 // Usage with dropbox
 const formPost = efp({
 	store: "dropbox",
@@ -94,7 +92,6 @@ const formPost = efp({
 		}
 	}
 });
-
 
 module.exports = (app) => {
 
