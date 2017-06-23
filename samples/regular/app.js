@@ -4,11 +4,13 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const efp = require("express-form-post");
 
+/*
 // Quick start usage (defaults to disk)
 const formPost = efp({
 	directory: path.join(__dirname, "tmp"),
 	minfileSize: 10
 });
+*/
 
 /*
 // Usage for disk
@@ -20,13 +22,13 @@ const formPost = efp({
 	filename: function(originalname, fieldname, mimetype) {
 		return Date.now() +  "-" + originalname;
 	},
-	validateFile: function(fieldname, mimetype) {
+	validateFile: function(cb, fieldname, mimetype) {
 		if(mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
 			return cb(false);
 		}
 		return cb();
 	},
-	validateBody: function(body) {
+	validateBody: function(cb, body) {
 		if(body.test == "hello") {
 			return cb(false);
 		}
@@ -34,29 +36,24 @@ const formPost = efp({
 	}
 });
 */
-/*
+
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
-	maxfileSize: 100000,
-	filename: function(originalname, fieldname) {
-		return fieldname + "-" + originalname;
+	validateBody: function(cb, body) {
+		cb(false);
+	},
+	filename: function(originalname, fieldname, mimetype) {
+		return fieldname + originalname;
 	},
 	api: {
 		accessKeyId: process.env.AWS_ACCESS_KEY_ID,
 		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 		bucketName: process.env.S3_BUCKET_NAME,
 		ACL: "public-read"
-	},
-	validateBody: function(cb, body) {
-		if(body.test == "hello") {
-			return cb(false);
-		} else {
-			return cb();
-		}
 	}
 });
-*/
+
 /*
 // Usage with dropbox
 const formPost = efp({

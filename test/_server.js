@@ -1,27 +1,30 @@
 /* eslint-env node, mocha */
-/* Creating a one time request server which closes as soon as it gets one request */
+/* Creating a x time request server which closes as soon as it gets x requests */
 /* Response will always be the req object so we can just check the req body and req files */
 
 const http = require("http");
 const efp = require("../index.js");
 
-module.exports = (opts, selfRequest) => {
+module.exports = (opts, selfRequest, x = 1) => {
+	let counter = 0;
 	var server = http.createServer();
 	const formPost = new efp(opts);
 
 	server.on("request", (req, res) => {
 		formPost.upload(req, res, (err) => {
-			if(err) console.log("Error printed by server:", err);
+			if(err) console.log("Error by server", err.message);
 			let responseJSON = {
 				files: req.files,
 				body: req.body
 			};
 			res.writeHead(200, { Connection: "close" });
 			res.end(JSON.stringify(responseJSON));
-			server.close();
+			if(++counter >= x) {
+				server.close();
+			}
 		});
 	});
 
 	server.listen(5000, () => {});
-	selfRequest(); // uses form-data api to send a request to this server
+	selfRequest(); // uses form-data api to initiate req to self
 };
