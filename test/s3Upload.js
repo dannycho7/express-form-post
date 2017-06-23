@@ -16,7 +16,8 @@ const apiInfo = {
 
 describe("Uploading files to bucket", function() {
 	before(function() {
-		this.skip();
+		// skipping this test because this is so costly. comment the method if you want to use this test
+		this.skip(); 
 	});
 	it("Should have updated req.files", function(done) {
 		this.timeout(15000);

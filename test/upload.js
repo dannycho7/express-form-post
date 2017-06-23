@@ -10,7 +10,10 @@ describe("Upload", () => {
 	it("Should have updated req.files", () => {
 		// http://localhost:5000
 		createServer({
-			directory: path.join(__dirname, "tmp")
+			directory: path.join(__dirname, "tmp"),
+			filename: function(originalname, fieldname, mimetype) {
+				return originalname;
+			}
 		}, () => {
 			// submit form and check req.files
 			var form = new FormData();
@@ -32,7 +35,10 @@ describe("Upload", () => {
 	it("Should have updated req.files and created the necessary directories", () => {
 		// http://localhost:5000
 		createServer({
-			directory: path.join(__dirname, "tmp", Date.now().toString())
+			directory: path.join(__dirname, "tmp", Date.now().toString()),
+			filename: function(originalname, fieldname, mimetype) {
+				return originalname;
+			}
 		}, () => {
 			// submit form and check req.files
 			var form = new FormData();
