@@ -39,7 +39,8 @@ const ExpressFormPost = function(user_options = {}) {
 		if(user_options.store == undefined) {
 			user_options.store = "disk";
 		} else {
-			throw new Error("storage " + user_options.store + " is not supported by express-form-post");
+			throw new Error("storage " + user_options.store + " is not supported by express-form-post.\n"
+				+ "\tCurrently available: ['disk', 'aws-s3', 'dropbox']");
 		}
 	}
 
@@ -109,12 +110,8 @@ const ExpressFormPost = function(user_options = {}) {
 	}
 };
 
-ExpressFormPost.prototype._fileHandler = function(req, res, cb) {
-	fileHandler.bind(this)(req, res, cb);
-};
-ExpressFormPost.prototype._attachListeners = function(busboy, req) {
-	attachListeners.bind(this)(busboy, req);
-};
+ExpressFormPost.prototype._fileHandler = fileHandler;
+ExpressFormPost.prototype._attachListeners = attachListeners;
 
 ExpressFormPost.prototype.fields = function() {
 	return require("./lib/fields").bind(this);
