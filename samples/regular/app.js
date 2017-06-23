@@ -37,11 +37,13 @@ const formPost = efp({
 });
 */
 
+/*
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
 	validateBody: function(cb, body) {
-		cb(false);
+		if(body.test != "") return cb(false);
+		return cb();
 	},
 	filename: function(originalname, fieldname, mimetype) {
 		return fieldname + originalname;
@@ -53,8 +55,9 @@ const formPost = efp({
 		ACL: "public-read"
 	}
 });
+*/
 
-/*
+
 // Usage with dropbox
 const formPost = efp({
 	store: "dropbox",
@@ -72,7 +75,7 @@ const formPost = efp({
 		}
 	}
 });
-*/
+
 module.exports = (app) => {
 
 	app.use(express.static(path.join(__dirname, "static")));

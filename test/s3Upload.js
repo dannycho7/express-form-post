@@ -12,7 +12,7 @@ const apiInfo = {
 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 	bucketName: process.env.S3_BUCKET_NAME,
 	ACL: "public-read"
-}
+};
 
 describe("Uploading files to bucket", function() {
 	before(function() {
@@ -109,7 +109,7 @@ describe("Uploading invalid files to s3", function() {
 					done();
 				});
 			});
-		}, 2);
+		});
 	});
 
 	it("Should have an empty req.files and no file uploaded to s3", function(done) {

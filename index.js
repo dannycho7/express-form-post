@@ -20,20 +20,16 @@ const ExpressFormPost = function(user_options = {}) {
 	 * This means that file_contents.end() only triggers after the "end" event is emitted
 	 */
 	if(user_options.validateBody) {
-		if(typeof user_options.validateBody != "function") {
-			throw new Error("option validateBody must be a function.");
-		}
+		if(typeof user_options.validateBody != "function") throw new Error("option validateBody must be a function.");
 	} else {
 		user_options.validateBody = (handlePromise) => handlePromise();
 	}
 
 	// max file size
-	if(user_options.maxfileSize) {
-		if(!Number.isInteger(user_options.maxfileSize)) {
-			throw new Error("option 'maxfileSize' must be an integer (Measured in bytes).");
-		}
+	if(user_options.maxfileSize && !Number.isInteger(user_options.maxfileSize)) {
+		throw new Error("option 'maxfileSize' must be an integer.");
 	}
-
+	
 	// Available storage methods
 	if(!["disk", "aws-s3", "dropbox"].includes(user_options.store)) {
 		if(user_options.store == undefined) {
@@ -59,12 +55,11 @@ const ExpressFormPost = function(user_options = {}) {
 			} 
 			return customName;
 		};
-		
 	} else {
 		switch(user_options.filename) {
 		case undefined:
 		case "": 
-			user_options.filename = (originalname) => { return hasha(originalname); };
+			user_options.filename = (originalname) => { return hasha(Date.now() + originalname); };
 			break;
 		default:
 			var user_input = user_options.filename; // Closures are awesome
@@ -72,7 +67,7 @@ const ExpressFormPost = function(user_options = {}) {
 		}
 	}
 
-	this.options = {
+	this.opts = {
 		store: user_options.store,
 		directory: user_options.directory,
 		filename: user_options.filename,
@@ -83,15 +78,15 @@ const ExpressFormPost = function(user_options = {}) {
 		api: user_options.api
 	};
 
-	this.storeMethod = require(path.join(__dirname, "lib/store", this.options.store));
+	this.storeMethod = require(path.join(__dirname, "lib/store", this.opts.store));
 
 	// set up abi objects here so we won't have to recreate upon sending buffer to store handler
-	switch(this.options.store){
+	switch(this.opts.store){
 	case "aws-s3":{
 		let aws = require("aws-sdk");
 		aws.config.update({
-			accessKeyId: this.options.api.accessKeyId,
-			secretAccessKey: this.options.api.secretAccessKey,
+			accessKeyId: this.opts.api.accessKeyId,
+			secretAccessKey: this.opts.api.secretAccessKey,
 		});
 		this.apiObject = new aws.S3();
 		break;
@@ -99,9 +94,9 @@ const ExpressFormPost = function(user_options = {}) {
 	case "dropbox":{
 		let Dropbox = require("dropbox");	
 		this.apiObject = new Dropbox({
-			accessToken: this.options.api.accessToken,
-			clientId: this.options.api.clientId,
-			selectUser: this.options.api.selectUser,
+			accessToken: this.opts.api.accessToken,
+			clientId: this.opts.api.clientId,
+			selectUser: this.opts.api.selectUser,
 		});
 		break;
 	}
