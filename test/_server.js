@@ -5,7 +5,7 @@
 const http = require("http");
 const efp = require("../index.js");
 
-module.exports = (opts, selfRequest, x = 1) => {
+module.exports = (opts, selfRequest, x = 1, wait = 0, cbWait = () => {} ) => {
 	let counter = 0;
 	var server = http.createServer();
 	const formPost = new efp(opts);
@@ -21,7 +21,10 @@ module.exports = (opts, selfRequest, x = 1) => {
 			res.writeHead(200, { Connection: "close" });
 			res.end(JSON.stringify(responseJSON));
 			if(++counter >= x) {
-				server.close();
+				setTimeout(() => {
+					server.close();
+					cbWait();
+				}, wait);
 			}
 		});
 	});

@@ -19,6 +19,38 @@ describe("Uploading large file to bucket", function() {
 		// skipping this test because this is so costly. comment the method if you want to use this test
 		this.skip(); 
 	});
+
+	it("Should not have updated req.files", function(done) {
+		this.timeout(15000);
+		// http://localhost:5000
+		createServer({
+			store: "aws-s3",
+			api: apiInfo,
+			validateBody: function(cb) {
+				cb(false);
+			},
+			filename: function() {
+				return "Should-not-have-updated-req-files";
+			}
+		}, () => {
+			// submit form and check req.files
+			let form = new FormData();
+			let file = fs.createReadStream(__dirname + "/files/large_image.JPG");
+			form.append("upload_img", file);
+			form.submit("http://localhost:5000", (err, res) => {
+				let data = "";
+				res.on("data", (chunk) => {
+					data += chunk;
+				});
+				res.on("end", () => {
+					let req = JSON.parse(data);
+					assert.equal(Object.keys(req.files).length, 0);
+				});
+			});
+		}, 1, 2000, done);
+	});
+
+	/*
 	it("Should have updated req.files", function(done) {
 		this.timeout(15000);
 		// http://localhost:5000
@@ -57,7 +89,7 @@ describe("Uploading large file to bucket", function() {
 				});
 			});
 		}, 2);
-	});
+	});*/
 });
 describe("Uploading multiple files to s3", function() {
 
@@ -127,7 +159,10 @@ describe("Uploading invalid files to s3", function() {
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
-			maxfileSize: 10000
+			maxfileSize: 10000,
+			filename: function() {
+				return "too-big"
+			}
 		}, () => {
 			// submit form and check req.files
 			let form = new FormData();
@@ -153,7 +188,10 @@ describe("Uploading invalid files to s3", function() {
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
-			minfileSize: 1000000000000
+			minfileSize: 1000000000000,
+			filename: function() {
+				return "too-small";
+			}
 		}, () => {
 			// submit form and check req.files
 			let form = new FormData();
@@ -184,6 +222,9 @@ describe("Uploading invalid files to s3", function() {
 					return cb(false);
 				}
 				return cb();
+			},
+			filename: function(){
+				return "ShouldEmpty";
 			}
 		}, () => {
 			// submit form and check req.files
