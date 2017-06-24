@@ -9,7 +9,7 @@ This api pipes buffer streams to api endpoints making it a very fast and memory 
 
 **Note: This module works in any node.js setting. Express is not required for usage.**
 
-Many bugs were addressed in ver 1.1.0, so please consider switching to the latest version or at least ver 1.1.0.
+Many bugs were addressed in v1.1.0, so if you have an older version please consider switching to the latest.
 
 ## Installation
 ```sh

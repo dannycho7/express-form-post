@@ -17,7 +17,7 @@ const apiInfo = {
 describe("Uploading large file to bucket", function() {
 	before(function() {
 		// skipping this test because this is so costly. comment the method if you want to use this test
-		this.skip(); 
+		// this.skip(); 
 	});
 
 	it("Should not have updated req.files", function(done) {
