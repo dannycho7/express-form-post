@@ -1,12 +1,10 @@
 {
   "name": "express-form-post",
   "version": "1.1.0",
-  "description": "Simple, reliable express http file and post body handler.",
+  "description": "Simple, reliable and memory efficient http file parse and upload api",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
-    "start": "node test/bin/server.js",
-    "start:dev": "nodemon test/bin/server.js"
+    "test": "mocha"
   },
   "keywords": [
     "fileupload",
