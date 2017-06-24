@@ -94,7 +94,7 @@ describe("Uploading large file to bucket", function() {
 describe("Uploading multiple files to s3", function() {
 
 	it("Should have added the small file and empty file to req.files", function(done) {
-		this.timeout(3000);
+		this.timeout(4000);
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
@@ -123,7 +123,7 @@ describe("Uploading multiple files to s3", function() {
 	});
 
 	it("Should have skipped the 2nd file in req.files", function(done) {
-		this.timeout(3000);
+		this.timeout(4000);
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
