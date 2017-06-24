@@ -7,11 +7,11 @@ const fs = require("fs");
 const path = require("path");
 
 describe("Upload", () => {
-	it("Should have updated req.files", () => {
+	it("Should have updated req.files", (done) => {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			filename: function(originalname, fieldname, mimetype) {
+			filename: function(originalname) {
 				return originalname;
 			}
 		}, () => {
@@ -27,16 +27,17 @@ describe("Upload", () => {
 				res.on("end", () => {
 					let req = JSON.parse(data);
 					assert.equal(req.files.upload_img.size, 130466);
+					done();
 				});
 			});
 		});
 	});
 
-	it("Should have updated req.files and created the necessary directories", () => {
+	it("Should have updated req.files and created the necessary directories", (done) => {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp", Date.now().toString()),
-			filename: function(originalname, fieldname, mimetype) {
+			filename: function(originalname) {
 				return originalname;
 			}
 		}, () => {
@@ -52,6 +53,7 @@ describe("Upload", () => {
 				res.on("end", () => {
 					let req = JSON.parse(data);
 					assert.equal(req.files.upload_img.size, 130466);
+					done();
 				});
 			});
 		});

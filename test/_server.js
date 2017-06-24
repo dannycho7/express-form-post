@@ -15,7 +15,8 @@ module.exports = (opts, selfRequest, x = 1) => {
 			if(err) console.log("Error by server", err.message);
 			let responseJSON = {
 				files: req.files,
-				body: req.body
+				body: req.body,
+				opts: opts
 			};
 			res.writeHead(200, { Connection: "close" });
 			res.end(JSON.stringify(responseJSON));

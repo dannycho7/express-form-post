@@ -14,7 +14,7 @@ const apiInfo = {
 	ACL: "public-read"
 };
 
-describe("Uploading files to bucket", function() {
+describe("Uploading large file to bucket", function() {
 	before(function() {
 		// skipping this test because this is so costly. comment the method if you want to use this test
 		this.skip(); 
@@ -57,6 +57,66 @@ describe("Uploading files to bucket", function() {
 				});
 			});
 		}, 2);
+	});
+});
+describe("Uploading multiple files to s3", function() {
+
+	it("Should have added the small file and empty file to req.files", function(done) {
+		this.timeout(3000);
+		createServer({
+			store: "aws-s3",
+			api: apiInfo,
+			filename: function(originalname) {
+				return Date.now() + "-" + originalname;
+			}
+		}, () => {
+			var form = new FormData();
+			let file1 = fs.createReadStream(path.join(__dirname, "files/small_file.txt"));
+			let file2 = fs.createReadStream(path.join(__dirname, "files/empty.txt"));
+			form.append("upload_img1", file1);
+			form.append("upload_img2", file2);
+			form.submit("http://localhost:5000", (err, res) => {
+				let data = "";
+				res.on("data", (chunk) => {
+					data += chunk;
+				});
+				res.on("end", () => {
+					let req = JSON.parse(data);
+					assert.equal(req.files.upload_img1.size, 35);
+					assert.equal(req.files.upload_img2.size, 0);
+					done();
+				});
+			});
+		});
+	});
+
+	it("Should have skipped the 2nd file in req.files", function(done) {
+		this.timeout(3000);
+		createServer({
+			store: "aws-s3",
+			api: apiInfo,
+			filename: function(originalname) {
+				return Date.now() + "-" + originalname;
+			}
+		}, () => {
+			var form = new FormData();
+			let file1 = fs.createReadStream(path.join(__dirname, "files/small_file.txt"));
+			let file2 = fs.createReadStream(path.join(__dirname, "files/empty.txt"));
+			form.append("upload_img", file1);
+			form.append("upload_img", file2);
+			form.submit("http://localhost:5000", (err, res) => {
+				let data = "";
+				res.on("data", (chunk) => {
+					data += chunk;
+				});
+				res.on("end", () => {
+					let req = JSON.parse(data);
+					assert.equal(req.files.upload_img.size, 35);
+					assert.equal(Object.keys(req.files).length, 1);
+					done();
+				});
+			});
+		});
 	});
 });
 
