@@ -222,9 +222,9 @@ Here are the different information you can input for each api storage. These opt
 #### aws-s3
 Key | Description | Note
 --- | --- | ---
-`accessKeyId` | AWS access key id | This is required. You can find it here : [aws console](https://aws.amazon.com/console/)
+`accessKeyId` | AWS access key id | **Required** You can find it here : [aws console](https://aws.amazon.com/console/)
 `secretAccessKey` | secret key for aws | Optional based on your s3 settings
-`bucketName` | The name of your bucket. | This is required.
+`bucketName` | The name of your bucket. | **Required**
 `ACL` | Access control list  | Privacy control. Defaults to "private"
 
 
@@ -232,7 +232,7 @@ Key | Description | Note
 
 Key | Description | Note
 --- | --- | ---
-`accessToken` | used by Dropbox to identify your app | This is required. Check out the [docs](https://www.dropbox.com/developers)
+`accessToken` | used by Dropbox to identify your app | **Required** Check out the [docs](https://www.dropbox.com/developers)
 `clientId` | Dropbox client Id | Optional
 `selectUser` | Specific user in a team box | Optional
 
