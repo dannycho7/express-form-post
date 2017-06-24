@@ -16,7 +16,7 @@ module.exports = (opts, selfRequest, x = 1) => {
 			files: req.files,
 			body: req.body,
 			opts: opts
-		}
+		};
 		res.send(JSON.stringify(responseJSON));
 		if(++counter >= x) {
 			server.close();

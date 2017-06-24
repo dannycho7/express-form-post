@@ -161,7 +161,7 @@ describe("Uploading invalid files to s3", function() {
 			api: apiInfo,
 			maxfileSize: 10000,
 			filename: function() {
-				return "too-big"
+				return "too-big";
 			}
 		}, () => {
 			// submit form and check req.files
