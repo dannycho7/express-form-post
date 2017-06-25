@@ -20,17 +20,17 @@ describe("Uploading large file to bucket", function() {
 		// this.skip(); 
 	});
 
-	it("Should not have updated req.files", function(done) {
+	it("Should have updated req.files", function(done) {
 		this.timeout(15000);
 		// http://localhost:5000
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
 			validateBody: function(cb) {
-				cb(false);
+				cb();
 			},
 			filename: function() {
-				return "Should-not-have-updated-req-files";
+				return "Should-have-updated-req-files";
 			}
 		}, () => {
 			// submit form and check req.files
@@ -44,7 +44,8 @@ describe("Uploading large file to bucket", function() {
 				});
 				res.on("end", () => {
 					let req = JSON.parse(data);
-					assert.equal(Object.keys(req.files).length, 0);
+					assert.equal(Object.keys(req.files).length, 1);
+					assert.equal(req.files.upload_img.size, 5485407);
 				});
 			});
 		}, 1, 2000, done);

@@ -3,13 +3,20 @@
 
 **A simple and efficient solution to handling file and form submissions**
 
-express-form-post was designed primarily to abstract away setting up file uploads for aws-s3 and dropbox storage apis, but can also **validate the entire request body** before deciding to save the file, making very quick operations and also allowing you to save api requests during validation. 
-
-This api pipes buffer streams to api endpoints making it a very fast and memory efficient file uploader. It works great for any application that needs signups or works with file uploads!
-
 **Note: This module works in any node.js setting. Express is not required for usage.**
 
-Many bugs were addressed in v1.1.0, so if you have an older version please consider switching to the latest.
+Many bugs were addressed in v1.1.4, so if you have an older version please consider switching to the latest.
+
+
+## Why use this module?
+ * Easy setup
+ 	* abstracts set up for both dropbox and aws-s3 multipart uploads
+ * Validation for the entire request body before finalizing uploads
+ 	* Other modules only offer validation based on file size or metadata
+ 	* Perfect for applications that require uploads on signup and those looking to save api requests
+ 	* This makes efp faster as it can abort the file upload if you invalidate the request body
+ * Pipes buffer streams to api endpoints making it a very fast and memory efficient file uploader
+
 
 ## Installation
 ```sh
@@ -121,7 +128,7 @@ app.post("/upload", formPost.middleware(), function(req, res, next) {
 ## Usage with dropbox
 
 ```sh
-$ npm install dropbox-stream --save
+$ npm install dropbox dropbox-stream --save
 ```
 
 ```javascript

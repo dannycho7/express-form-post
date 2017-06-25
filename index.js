@@ -79,11 +79,15 @@ const ExpressFormPost = function(user_options = {}) {
 	};
 
 	this.storeMethod = require(path.join(__dirname, "lib/store", this.opts.store));
+	let checkApi = () => {
+		if(!this.opts.api) throw new Error("You must specify api information to use " + this.opts.storage +  " storage");
+	}
 
-	// set up abi objects here so we won't have to recreate upon sending buffer to store handler
+	// set up abi objects here so we won't have to recreate upon sending stream to store handler
 	switch(this.opts.store){
 	case "aws-s3":{
 		let aws = require("aws-sdk");
+		checkApi();
 		aws.config.update({
 			accessKeyId: this.opts.api.accessKeyId,
 			secretAccessKey: this.opts.api.secretAccessKey,
@@ -92,7 +96,8 @@ const ExpressFormPost = function(user_options = {}) {
 		break;
 	}
 	case "dropbox":{
-		let Dropbox = require("dropbox");	
+		let Dropbox = require("dropbox");
+		checkApi();
 		this.apiObject = new Dropbox({
 			accessToken: this.opts.api.accessToken,
 			clientId: this.opts.api.clientId,

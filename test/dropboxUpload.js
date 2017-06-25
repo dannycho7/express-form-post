@@ -139,6 +139,7 @@ describe("Uploading files to dropbox", function() {
 				let file = fs.createReadStream(__dirname + "/files/large_image.JPG");
 				form.append("upload_img", file);
 				form.submit("http://localhost:5000", (err, res) => {
+					if(err) done(err);
 					let data = "";
 					res.on("data", (chunk) => {
 						data += chunk;
