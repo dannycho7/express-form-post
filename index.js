@@ -75,7 +75,8 @@ const ExpressFormPost = function(user_options = {}) {
 		minfileSize: user_options.minfileSize || 0,
 		validateFile: user_options.validateFile,
 		validateBody: user_options.validateBody,
-		api: user_options.api
+		api: user_options.api,
+		promise: user_options.promise
 	};
 
 	this.storeMethod = require(path.join(__dirname, "lib/store", this.opts.store));
@@ -131,8 +132,23 @@ ExpressFormPost.prototype.middleware = function(handleError = undefined) {
 // Upload function to be used within routes. handleError set as callback as well and can be check with if (err)
 ExpressFormPost.prototype.upload = function(req, res, cb = () => {}) {
 	typeof cb == "function" ? "" : cb = () => {}; // prevent user failure
-	// cb is cb in fileHandler param
-	this._fileHandler(req, res, cb);
+
+	if(this.opts.promise === true) {
+		return new Promise((resolve, reject) => {
+			// promiseCallback rejects if called as this.handleError(err) and resolves if called as this.finished();
+			let promiseCallback = (err) => {
+				if(err) {
+					return reject(err);
+				} else {
+					resolve();
+				}
+			};
+			this._fileHandler(req, res, promiseCallback);
+		});
+	} else {
+		// cb is cb in fileHandler param
+		this._fileHandler(req, res, cb);
+	}
 };
 
 
