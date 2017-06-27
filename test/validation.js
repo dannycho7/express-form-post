@@ -152,7 +152,7 @@ describe("Uploading invalid files", function() {
 							if(stats.isFile()) return done(new Error("File was actually uploaded"));
 							done();
 						});
-					}, 0);
+					});
 				});
 			});
 		});

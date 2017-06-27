@@ -21,6 +21,7 @@ module.exports = (opts, selfRequest, x = 1, wait = 0, cbWait = () => {} ) => {
 			res.writeHead(200, { Connection: "close" });
 			res.end(JSON.stringify(responseJSON));
 			if(++counter >= x) {
+				if(wait == 0) return server.close();
 				setTimeout(() => {
 					server.close();
 					cbWait();
