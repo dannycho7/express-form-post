@@ -11,7 +11,7 @@ const ExpressFormPost = function(user_options = {}) {
 	if(user_options.validateFile) {
 		if(typeof user_options.validateFile != "function") throw new Error("option 'validateFile' must be a function.");
 	} else {
-		user_options.validateFile = (handlePromise) => handlePromise();
+		user_options.validateFile = (fieldname, mimetype, handlePromise) => handlePromise();
 	}
 
 	/*
@@ -22,7 +22,7 @@ const ExpressFormPost = function(user_options = {}) {
 	if(user_options.validateBody) {
 		if(typeof user_options.validateBody != "function") throw new Error("option validateBody must be a function.");
 	} else {
-		user_options.validateBody = (handlePromise) => handlePromise();
+		user_options.validateBody = (body, handlePromise) => handlePromise();
 	}
 
 	// max file size

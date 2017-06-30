@@ -95,14 +95,14 @@ const formPost = efp({
 	filename: function(originalname, fieldname, mimetype) {
 		return Date.now() + "-" + originalname;
 	},
-	validateFile: function(cb, fieldname, mimetype) {
+	validateFile: function(fieldname, mimetype, cb) {
 		console.log(mimetype);
 		if(mimetype != "application/pdf") {
 			return cb(false);
 		}
 		return cb();
 	},
-	validateBody: function(cb, body) {
+	validateBody: function(body, cb) {
 		// validates password length before uploading file
 		if(body.password.length > 7) {
 			return cb(false);
@@ -206,7 +206,7 @@ The validateBody method validates the request's body before sending off your fil
 
 ```javascript
 const formPost = efp({
-	validateBody: function(cb, body) {
+	validateBody: function(body, cb) {
 		if(body.username == undefined) {
 			return cb(false);
 		}
@@ -220,7 +220,7 @@ The validateFile method validates the file data itself. An example use case woul
 
 ```javascript
 const formPost = efp({
-	validateFile: function(fieldname, mimetype) {
+	validateFile: function(fieldname, mimetype, cb) {
 		if(mimetype != "application/pdf") {
 			return cb(false);
 		} else {
@@ -255,7 +255,7 @@ Here are the different information you can input for each api storage. These opt
 #### aws-s3
 Key | Description | Note
 --- | --- | ---
-`accessKeyId` | AWS access key id | **Required** You can find it here : [aws console](https://aws.amazon.com/console/)
+`accessKeyId` | AWS access key id | Optional if already set through aws.config.update. You can find it here : [aws console](https://aws.amazon.com/console/)
 `secretAccessKey` | secret key for aws | Optional based on your s3 settings
 `bucketName` | The name of your bucket. | **Required**
 `ACL` | Access control list  | Privacy control. Defaults to "private"
