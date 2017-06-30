@@ -18,8 +18,8 @@ describe("Uploading invalid files to dropbox", function() {
 		createServer({
 			store: "dropbox",
 			api: apiInfo,
-			filename: function(originalname) {
-				return Date.now() + "-" + originalname;
+			filename: function(req, file, cb) {
+				cb(Date.now() + "-" + file.originalname);
 			},
 			maxfileSize: 10000
 		}, () => {
@@ -47,8 +47,8 @@ describe("Uploading invalid files to dropbox", function() {
 		createServer({
 			store: "dropbox",
 			api: apiInfo,
-			filename: function(originalname) {
-				return Date.now() + "-" + originalname;
+			filename: function(req, file, cb) {
+				cb(Date.now() + "-" + file.originalname);
 			},
 			minfileSize: 1000000000000
 		}, () => {
@@ -76,10 +76,10 @@ describe("Uploading invalid files to dropbox", function() {
 		createServer({
 			store: "dropbox",
 			api: apiInfo,
-			filename: function(originalname) {
-				return Date.now() + "-" + originalname;
+			filename: function(req, file, cb) {
+				cb(Date.now() + "-" + file.originalname);
 			},
-			validateFile: function(cb, fieldname, mimetype) {
+			validateFile: function(fieldname, mimetype, cb) {
 				if(mimetype != "application/pdf") {
 					return cb(false);
 				}
@@ -116,8 +116,8 @@ describe("Uploading files to dropbox", function() {
 		createServer({
 			store: "dropbox",
 			api: apiInfo,
-			filename: function(originalname) {
-				return Date.now() + "-" + originalname;
+			filename: function(req, file, cb) {
+				cb(Date.now() + "-" + file.originalname);
 			}
 		}, () => {
 			// submit form and check req.files

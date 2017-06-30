@@ -26,11 +26,11 @@ describe("Uploading large file to bucket", function() {
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
-			validateBody: function(cb) {
+			validateBody: function(body, cb) {
 				cb();
 			},
-			filename: function() {
-				return "Should-have-updated-req-files";
+			filename: function(req, file, cb) {
+				cb("Should-have-updated-req-files");
 			}
 		}, () => {
 			// submit form and check req.files
@@ -99,8 +99,8 @@ describe("Uploading multiple files to s3", function() {
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
-			filename: function(originalname) {
-				return Date.now() + "-" + originalname;
+			filename: function(req, file, cb) {
+				cb(Date.now() + "-" + file.originalname);
 			}
 		}, () => {
 			var form = new FormData();
@@ -128,8 +128,8 @@ describe("Uploading multiple files to s3", function() {
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
-			filename: function(originalname) {
-				return Date.now() + "-" + originalname;
+			filename: function(req, file, cb) {
+				cb(Date.now() + "-" + file.originalname);
 			}
 		}, () => {
 			var form = new FormData();
@@ -161,8 +161,8 @@ describe("Uploading invalid files to s3", function() {
 			store: "aws-s3",
 			api: apiInfo,
 			maxfileSize: 10000,
-			filename: function() {
-				return "too-big";
+			filename: function(req, file, cb) {
+				cb("too-big");
 			}
 		}, () => {
 			// submit form and check req.files
@@ -190,8 +190,8 @@ describe("Uploading invalid files to s3", function() {
 			store: "aws-s3",
 			api: apiInfo,
 			minfileSize: 1000000000000,
-			filename: function() {
-				return "too-small";
+			filename: function(req, file, cb) {
+				cb("too-small");
 			}
 		}, () => {
 			// submit form and check req.files
@@ -218,14 +218,14 @@ describe("Uploading invalid files to s3", function() {
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
-			validateFile: function(cb, fieldname, mimetype) {
+			validateFile: function(fieldname, mimetype, cb) {
 				if(mimetype != "application/pdf") {
 					return cb(false);
 				}
 				return cb();
 			},
-			filename: function(){
-				return "ShouldEmpty";
+			filename: function(req, file, cb){
+				cb("ShouldEmpty");
 			}
 		}, () => {
 			// submit form and check req.files

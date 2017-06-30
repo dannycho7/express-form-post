@@ -11,8 +11,8 @@ describe("Upload", () => {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			filename: function(originalname) {
-				return originalname;
+			filename: function(req, file, cb) {
+				cb(file.originalname);
 			}
 		}, () => {
 			// submit form and check req.files
@@ -37,8 +37,8 @@ describe("Upload", () => {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp", Date.now().toString()),
-			filename: function(originalname) {
-				return originalname;
+			filename: function(req, file, cb) {
+				cb(file.originalname);
 			}
 		}, () => {
 			// submit form and check req.files

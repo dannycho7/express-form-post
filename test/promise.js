@@ -13,11 +13,11 @@ describe("Testing out promise API", function() {
 		// http://localhost:5000
 		createServer({
 			promise: true,
-			validateBody: function(cb) {
+			validateBody: function(body, cb) {
 				cb();
 			},
-			filename: function() {
-				return Date.now() + "-" + "File-Should-Upload-Promise";
+			filename: function(req, file, cb) {
+				cb(Date.now() + "-" + "File-Should-Upload-Promise");
 			},
 			directory: path.join(__dirname, "tmp")
 		}, () => {
@@ -26,7 +26,7 @@ describe("Testing out promise API", function() {
 				if(++returnCount === 2) {
 					done();
 				}
-			}
+			};
 			// submit form and check req.files
 			let form1 = new FormData();
 			let file1 = fs.createReadStream(__dirname + "/files/large_image.JPG");

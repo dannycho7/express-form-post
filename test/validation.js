@@ -12,14 +12,14 @@ describe("Uploading invalid files", function() {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			validateFile: function(cb, fieldname, mimetype) {
+			validateFile: function(fieldname, mimetype, cb) {
 				if(mimetype != "application/pdf") {
 					return cb(false);
 				}
 				cb();
 			},
-			filename: function() {
-				return "jpgNotPDF";
+			filename: function(req, file, cb) {
+				cb("jpgNotPDF");
 			}
 		}, () => {
 			// submit form and check req.files
@@ -49,14 +49,14 @@ describe("Uploading invalid files", function() {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			validateFile: function(cb) {
+			validateFile: function(fieldname, mimetype, cb) {
 				cb();
 				cb(false);
 				cb(false);
 				cb(false);
 			},
-			filename: function() {
-				return "validateMoreThanOnce";
+			filename: function(req, file, cb) {
+				cb("validateMoreThanOnce");
 			}
 		}, () => {
 			// submit form and check req.files
@@ -85,15 +85,15 @@ describe("Uploading invalid files", function() {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			filename: function() {
-				return "invalidBodies";
+			filename: function(req, file, cb) {
+				cb("invalidBodies");
 			},
-			validateBody: function(cb) {
+			validateBody: function(body, cb) {
 				cb();
 				cb(false);
 				cb(false);
 			},
-			validateFile: function(cb) {
+			validateFile: function(fieldname, mimetype, cb) {
 				cb();
 				cb(false);
 				cb();
@@ -126,10 +126,10 @@ describe("Uploading invalid files", function() {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			filename: function() {
-				return "invalidBody";
+			filename: function(req, file, cb) {
+				cb("invalidBody");
 			},
-			validateBody: function(cb) {
+			validateBody: function(body, cb) {
 				return cb(false);
 			}
 		}, () => {
@@ -174,8 +174,8 @@ describe("Uploading large files", function() {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			filename: function(originalname, fieldname) {
-				return fieldname + "-" + originalname;
+			filename: function(req, file, cb) {
+				cb(file.fieldname + "-" + file.originalname);
 			}
 		}, () => {
 			// submit form and check req.files

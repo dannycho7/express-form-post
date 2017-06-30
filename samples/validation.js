@@ -9,15 +9,15 @@ const efp = require("express-form-post");
 const formPost = efp({
 	store: "aws-s3",
 	maxfileSize: 1000000,
-	filename: function(originalname, fieldname, mimetype) {
-		return Date.now() + originalname;
+	filename: function(req, file, cb) {
+		cb(Date.now() + file.originalname);
 	},
-	validateBody: function(body) {
+	validateBody: function(body, cb) {
 		if(body.name == "henry") {
-			return false;
+			return cb(false);
 		}
 	},
-	validateFile: function(cb, fieldname, mimetype) {
+	validateFile: function(fieldname, mimetype, cb) {
 		if(mimetype != "application/pdf") {
 			return cb(false);
 		}

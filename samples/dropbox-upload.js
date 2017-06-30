@@ -8,8 +8,8 @@ const path = require("path");
 const efp = require("express-form-post");
 const formPost = efp({
 	store: "dropbox",
-	filename: function(originalname, fieldname, mimetype) {
-		return Date.now() + originalname;
+	filename: function(req, file, cb) {
+		cb(Date.now() + file.originalname);
 	},
 	api: {
 		accessToken: process.env.dropboxAccessToken

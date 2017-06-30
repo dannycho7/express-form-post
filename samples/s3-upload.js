@@ -8,8 +8,8 @@ const path = require("path");
 const efp = require("express-form-post");
 const formPost = efp({
 	store: "aws-s3",
-	filename: function(originalname, fieldname, mimetype) {
-		return Date.now() + originalname;
+	filename: function(req, file, cb) {
+		cb(Date.now() + file.originalname);
 	},
 	api: {
 		accessKeyId: process.env.AWS_ACCESS_KEY_ID,

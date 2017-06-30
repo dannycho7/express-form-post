@@ -38,8 +38,8 @@ describe("Submitting empty form data", () => {
 			// http://localhost:5000
 			createServer({
 				directory: path.join(__dirname, "tmp"),
-				filename: function(originalname, fieldname) {
-					return fieldname + "-" + originalname;
+				filename: function(req, file, cb) {
+					cb(file.fieldname + "-" + file.originalname);
 				}
 			}, () => {
 				var form = new FormData(done);
@@ -90,8 +90,8 @@ describe("Submitting empty form data", () => {
 			createServer({
 				minfileSize: 10,
 				directory: path.join(__dirname, "tmp", "minUpload"),
-				filename: function(originalname, fieldname) {
-					return fieldname + "-" + originalname;
+				filename: function(req, file, cb) {
+					cb(file.fieldname + "-" + file.originalname);
 				}
 			}, () => {
 				var form = new FormData();

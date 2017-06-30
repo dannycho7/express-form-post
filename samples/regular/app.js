@@ -19,16 +19,16 @@ const formPost = efp({
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 1000000,
 	minfileSize: 1,
-	filename: function(originalname, fieldname, mimetype) {
-		return Date.now() +  "-" + originalname;
+	filename: function(req, file, cb) {
+		cb(Date.now() +  "-" + file.originalname);
 	},
-	validateFile: function(cb, fieldname, mimetype) {
+	validateFile: function(fieldname, mimetype, cb) {
 		if(mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
 			return cb(false);
 		}
 		return cb();
 	},
-	validateBody: function(cb, body) {
+	validateBody: function(body, cb) {
 		if(body.test == "hello") {
 			return cb(false);
 		}
@@ -41,12 +41,12 @@ const formPost = efp({
 // Usage for s3
 const formPost = efp({
 	store: "aws-s3",
-	validateBody: function(cb, body) {
+	validateBody: function(body, cb) {
 		if(body.test != "") return cb(false);
 		return cb();
 	},
-	filename: function(originalname, fieldname, mimetype) {
-		return fieldname + originalname;
+	filename: function(req, file, cb) {
+		cb(file.fieldname + file.originalname);
 	},
 	api: {
 		accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -61,13 +61,13 @@ const formPost = efp({
 // Usage with dropbox
 const formPost = efp({
 	store: "dropbox",
-	filename: function(originalname, fieldname, mimetype) {
-		return Date.now() + originalname;
+	filename: function(req, file, cb) {
+		cb(Date.now() + file.originalname);
 	},
 	api: {
 		accessToken: process.env.dropboxAccessToken,
 	},
-	validateBody: function(cb, body) {
+	validateBody: function(body, cb) {
 		if(body.test == "hello") {
 			return cb(false);
 		} else {

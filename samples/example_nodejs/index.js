@@ -10,16 +10,16 @@ const efp = require("express-form-post");
 const formPost = efp({
 	directory: path.join(__dirname, "tmp"),
 	maxfileSize: 1000000,
-	filename: function(originalname, fieldname, mimetype) {
-		return Date.now() + originalname;
+	filename: function(req, file, cb) {
+		cb(Date.now() + file.originalname);
 	},
-	validateBody: function(cb, body) {
+	validateBody: function(body, cb) {
 		if(body.name == "henry") {
 			return cb(false);
 		}
 		cb();
 	},
-	validateFile: function(cb, fieldname, mimetype) {
+	validateFile: function(fieldname, mimetype, cb) {
 		if(mimetype != "application/pdf") {
 			return cb(false);
 		}
