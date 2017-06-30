@@ -1,6 +1,6 @@
 {
   "name": "express-form-post",
-  "version": "1.1.5",
+  "version": "1.2.1",
   "description": "Simple, reliable and memory efficient http file parse and upload api",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,8 @@
     "signup",
     "validation",
     "request",
-    "body"
+    "body",
+    "validate body"
   ],
   "author": "Danny Cho (dannycho7)",
   "license": "ISC",

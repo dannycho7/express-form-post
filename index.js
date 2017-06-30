@@ -48,22 +48,20 @@ const ExpressFormPost = function(user_options = {}) {
 	// filename options setup
 	if(typeof user_options.filename == "function") {
 		let customFileMethod = user_options.filename;
-		user_options.filename = function(originalname, fieldname, mimetype) {
-			let customName = customFileMethod(originalname, fieldname, mimetype);
-			if(customName == undefined || customName == "") {
-				return originalname; // returning the original name that is being uploaded
-			} 
-			return customName;
+		user_options.filename = (req, fileInfo) => {
+			return new Promise((resolve) => customFileMethod(req, fileInfo, resolve));
 		};
 	} else {
 		switch(user_options.filename) {
 		case undefined:
 		case "": 
-			user_options.filename = (originalname) => { return hasha(Date.now() + originalname); };
+			user_options.filename = (originalname) => { return Promise.resolve(hasha(Date.now() + originalname)); };
 			break;
 		default:
 			var user_input = user_options.filename; // Closures are awesome
-			user_options.filename = () => { return user_input; };
+			user_options.filename = (req, fileInfo) => {
+				return new Promise((resolve) => user_input(req, fileInfo, resolve));
+			};
 		}
 	}
 
@@ -82,7 +80,7 @@ const ExpressFormPost = function(user_options = {}) {
 	this.storeMethod = require(path.join(__dirname, "lib/store", this.opts.store));
 	let checkApi = () => {
 		if(!this.opts.api) throw new Error("You must specify api information to use " + this.opts.storage +  " storage");
-	}
+	};
 
 	// set up abi objects here so we won't have to recreate upon sending stream to store handler
 	switch(this.opts.store){
