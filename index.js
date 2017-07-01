@@ -133,7 +133,7 @@ ExpressFormPost.prototype.upload = function(req, res, cb = () => {}) {
 
 	if(this.opts.promise === true) {
 		return new Promise((resolve, reject) => {
-			// promiseCallback rejects if called as this.handleError(err) and resolves if called as this.finished();
+			// promiseCallback rejects if called as req.efp.handleError(err) and resolves if called as req.efp.finished();
 			let promiseCallback = (err) => {
 				if(err) {
 					return reject(err);
