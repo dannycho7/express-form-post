@@ -4,6 +4,8 @@
 
 const http = require("http");
 const efp = require("../index.js");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = (opts, selfRequest, x = 1, wait = 0, cbWait = () => {} ) => {
 	let counter = 0;

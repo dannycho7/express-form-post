@@ -12,7 +12,7 @@ const apiInfo = {
 };
 
 describe("Uploading invalid files to dropbox", function() {
-	it("Uploading a file too big: Should not be in bucket and have an empty req.files", function(done) {
+	it("Uploading a file too big: Should not be in dropbox and have an empty req.files", function(done) {
 		this.timeout(4000);
 		// http://localhost:5000
 		createServer({
