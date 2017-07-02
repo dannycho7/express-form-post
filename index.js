@@ -116,9 +116,7 @@ ExpressFormPost.prototype.fields = function() {
 	return require("./lib/fields").bind(this);
 };
 
-ExpressFormPost.prototype.middleware = function(handleError = undefined) {
-	this.middleError = handleError; // the function to be called inside handleError
-
+ExpressFormPost.prototype.middleware = function() {
 	/*
 	 * fileHandler will be called in app.use as (req, res, cb)
 	 * binding this to the return value because when it is used in the express middleware _filehandler loses this context

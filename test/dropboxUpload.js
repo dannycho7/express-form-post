@@ -111,7 +111,7 @@ describe("Uploading files to dropbox", function() {
 		// this.skip(); 
 	});
 	it("Should have updated req.files", function(done) {
-		this.timeout(25000);
+		this.timeout(45000);
 		// http://localhost:5000
 		createServer({
 			store: "dropbox",

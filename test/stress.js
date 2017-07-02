@@ -7,9 +7,9 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
-const apiInfo = {
+/* const apiInfo = {
 	accessToken: process.env.dropboxAccessToken
-};
+}; */
 
 
 describe("Uploading multiple files and fields to disk", function() {
@@ -36,7 +36,7 @@ describe("Uploading multiple files and fields to disk", function() {
 			form.append("name", "Danny");
 			form.append("password", "1234");
 
-			let form1 = new Promise((resolve, reject) => {
+			let form1 = new Promise((resolve) => {
 				form.submit("http://localhost:5000", (err, res) => {
 					let data = "";
 					res.on("data", (chunk) => {
@@ -65,7 +65,7 @@ describe("Uploading multiple files and fields to disk", function() {
 			form2Data.append("name", "Danny");
 			form2Data.append("password", "1234");
 
-			let form2 = new Promise((resolve, reject) => {
+			let form2 = new Promise((resolve) => {
 				form2Data.submit("http://localhost:5000", (err, res) => {
 					let data = "";
 					res.on("data", (chunk) => {
@@ -94,7 +94,7 @@ describe("Uploading multiple files and fields to disk", function() {
 			form3Data.append("name", "Danny");
 			form3Data.append("password", "1234");
 
-			let form3 = new Promise((resolve, reject) => {
+			let form3 = new Promise((resolve) => {
 				form3Data.submit("http://localhost:5000", (err, res) => {
 					let data = "";
 					res.on("data", (chunk) => {
