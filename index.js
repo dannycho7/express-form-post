@@ -11,7 +11,7 @@ const ExpressFormPost = function(user_options = {}) {
 	if(user_options.validateFile) {
 		if(typeof user_options.validateFile != "function") throw new Error("option 'validateFile' must be a function.");
 	} else {
-		user_options.validateFile = (fieldname, mimetype, handlePromise) => handlePromise();
+		user_options.validateFile = (file, handlePromise) => handlePromise();
 	}
 
 	/*

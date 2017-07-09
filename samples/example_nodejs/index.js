@@ -19,8 +19,8 @@ const formPost = efp({
 		}
 		cb();
 	},
-	validateFile: function(fieldname, mimetype, cb) {
-		if(mimetype != "application/pdf") {
+	validateFile: function(file, cb) {
+		if(file.mimetype != "application/pdf") {
 			return cb(false);
 		}
 		cb();
