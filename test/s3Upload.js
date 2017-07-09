@@ -218,8 +218,8 @@ describe("Uploading invalid files to s3", function() {
 		createServer({
 			store: "aws-s3",
 			api: apiInfo,
-			validateFile: function(fieldname, mimetype, cb) {
-				if(mimetype != "application/pdf") {
+			validateFile: function(file, cb) {
+				if(file.mimetype != "application/pdf") {
 					return cb(false);
 				}
 				return cb();

@@ -12,8 +12,8 @@ describe("Uploading invalid files", function() {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			validateFile: function(fieldname, mimetype, cb) {
-				if(mimetype != "application/pdf") {
+			validateFile: function(file, cb) {
+				if(file.mimetype != "application/pdf") {
 					return cb(false);
 				}
 				cb();
@@ -49,7 +49,7 @@ describe("Uploading invalid files", function() {
 		// http://localhost:5000
 		createServer({
 			directory: path.join(__dirname, "tmp"),
-			validateFile: function(fieldname, mimetype, cb) {
+			validateFile: function(file, cb) {
 				cb();
 				cb(false);
 				cb(false);
@@ -93,7 +93,7 @@ describe("Uploading invalid files", function() {
 				cb(false);
 				cb(false);
 			},
-			validateFile: function(fieldname, mimetype, cb) {
+			validateFile: function(file, cb) {
 				cb();
 				cb(false);
 				cb();
