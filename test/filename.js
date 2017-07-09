@@ -33,7 +33,7 @@ describe("Uploading with filename with trailing slashes", function() {
 });
 
 describe("Uploading file with filename function throwing an error", function() {
-	it("Should throw an error", function(done) {
+	it("Should result in req.files being empty", function(done) {
 		createServer({
 			directory: path.join(__dirname, "tmp"),
 			filename: function(fieldname, mimetype, cb) {
@@ -50,7 +50,7 @@ describe("Uploading file with filename function throwing an error", function() {
 				});
 				res.on("end", () => {
 					let req = JSON.parse(data);
-					assert.equal(req.files.upload_img.size, 130466);
+					assert.deepEqual(req.files, {});
 					done();
 				});
 			});
