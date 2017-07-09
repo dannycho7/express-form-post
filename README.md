@@ -193,14 +193,15 @@ Key | Description | Note
 
 One of the advantages of using express-form-post to handle file uploads is the validation api. There are two (optional) validation methods available during setup: validateFile and validateBody. <br/>
 
-**If specifying a validation method property, you must call the callback or your file will go unhandled.**
+**If specifying a validation method property, you must call the callback or skip (for validateFile) or your file will go unhandled.**
 
-Both validate functions were designed to be an intuitive way to create conditional file handling. 
+Both validate functions were designed to be an intuitive way to create conditional file handling. It doesn't matter how many times you call the callback or skip function, only the first occurrence will be used to determine validity.
 
 Calling the callback without any arguments or passing in `null` or `undefined` will 'validate' the file for that validate function.
 
-In order to invalidate a request/file upload, you pass in an error message in the callback function. Alternatively, you can pass in an error object or false, but a string works the same. 
+In order to invalidate a request/file upload, you pass in an error message in the callback function. Alternatively, you can pass in an error object or false, but a string works the same.
 
+validateFile also allows you the option to `skip` or ignore a certain file. Simply, call the skip function.
 
 Examples are listed below.
 
@@ -219,13 +220,18 @@ const formPost = efp({
 ```
 
 #### validateFile(file, callback, skip)
-The validateFile method validates the file data itself. An example use case would be aborting the upload if the file is not a pdf and only accepting files of a particular fieldname. (That fieldname will be "validName" in this example)
+The validateFile method validates the file data itself. 
+ * Calling the callback with no arguments continues the upload.
+ * Calling the callback with any argument will abort the upload process.
+ * Calling the skip function will skip that particular file and continue the upload.
+
+An example use case would be aborting the upload if the file is not a pdf and only accepting files of a particular fieldname. (That fieldname will be "validName" in this example)
 
 ```javascript
 const formPost = efp({
 	validateFile: function(file, cb, skip) {
 		if(file.fieldname != "validName") {
-			skip();
+			skip(); // skipping a file if their fieldname is not "validName"
 		}
 		if(file.mimetype != "application/pdf") {
 			cb("File needs to be a PDF"); // aborts the upload
