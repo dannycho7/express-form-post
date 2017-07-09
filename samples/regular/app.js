@@ -22,8 +22,8 @@ const formPost = efp({
 	filename: function(req, file, cb) {
 		cb(Date.now() +  "-" + file.originalname);
 	},
-	validateFile: function(fieldname, mimetype, cb) {
-		if(mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+	validateFile: function(file, cb) {
+		if(file.mimetype == "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
 			return cb(false);
 		}
 		return cb();
