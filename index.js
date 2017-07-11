@@ -95,13 +95,12 @@ const ExpressFormPost = function(user_options = {}) {
 		break;
 	}
 	case "dropbox":{
-		let Dropbox = require("dropbox");
 		checkApi();
-		this.apiObject = new Dropbox({
+		this.apiObject = {
 			accessToken: this.opts.api.accessToken,
 			clientId: this.opts.api.clientId,
 			selectUser: this.opts.api.selectUser,
-		});
+		};
 		break;
 	}
 	default:

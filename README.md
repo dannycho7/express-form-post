@@ -12,7 +12,7 @@
  * Validation for the entire request body before finalizing uploads
  	* Other modules only offer validation based on file size or metadata
  	* Perfect for applications that require uploads on signup and those looking to save api requests
- 	* This makes efp faster as it can abort the file upload if you invalidate the request body
+ 	* This makes efp faster for cloud storage as it can abort the file upload if you invalidate the request body
  * Pipes buffer streams to api endpoints making it a very fast and memory efficient file uploader
 
 
@@ -146,7 +146,7 @@ app.post("/upload", formPost.middleware(), function(req, res, next) {
 ## Usage with dropbox
 
 ```sh
-$ npm install dropbox dropbox-stream --save
+$ npm install dropbox-stream --save
 ```
 
 ```javascript
