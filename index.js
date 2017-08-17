@@ -13,7 +13,7 @@ const ExpressFormPost = function(user_options = {}) {
 	} else {
 		user_options.validateFile = (file, handlePromise) => handlePromise();
 	}
-
+	
 	/*
 	 * validateBody validates the req.body before sending off files to the store
 	 * if validateBody is set in any way, the file buffers will be sent to the store after the request has been validated
