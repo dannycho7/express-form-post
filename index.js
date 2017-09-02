@@ -43,7 +43,7 @@ const ExpressFormPost = function(user_options = {}) {
 	// Setting default directory based on store
 	user_options.directory == undefined ? user_options.store == "disk" ? (
 		user_options.directory = path.join(module.parent.filename, "..")
-	) : user_options.directory = "" : "";
+	) : user_options.directory = "" : null;
 
 	// filename options setup
 	if(typeof user_options.filename == "function") {
@@ -126,7 +126,7 @@ ExpressFormPost.prototype.middleware = function() {
 
 // Upload function to be used within routes. handleError set as callback as well and can be check with if (err)
 ExpressFormPost.prototype.upload = function(req, res, cb = () => {}) {
-	typeof cb == "function" ? "" : cb = () => {}; // prevent user failure
+	typeof cb == "function" ? null : cb = () => {}; // prevent user failure
 
 	if(this.opts.promise === true) {
 		return new Promise((resolve, reject) => {
