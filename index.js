@@ -60,12 +60,14 @@ const ExpressFormPost = function(user_options = {}) {
 		}
 	}
 
+
+
 	this.opts = {
 		store: user_options.store,
 		directory: user_options.directory,
 		filename: user_options.filename,
-		maxfileSize: user_options.maxfileSize,
-		minfileSize: user_options.minfileSize || 0,
+		maxfileSize: typeof user_options.maxfileSize === "object" ? user_options.maxfileSize : { size: user_options.maxfileSize },
+		minfileSize: typeof user_options.minfileSize === "object" ? user_options.minfileSize : { size: user_options.minfileSize || 0},
 		validateFile: user_options.validateFile,
 		validateBody: user_options.validateBody,
 		api: user_options.api,
