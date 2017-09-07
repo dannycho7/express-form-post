@@ -186,7 +186,7 @@ Key | Description | Note
 `maxfileSize` | Maximum Size of the uploaded file in bytes | defaults to infiniti
 `minfileSize` | Minimum Size of the uploaded file in bytes | defaults to 0
 `validateFile` | function to validate uploaded file | takes params: file, callback, skip
-`validateBody` | function to validate the body of the request before storing the validated file | takes params: body, callback
+`validateBody` | function to validate the body of the request before storing the validated file | takes params: body, callback, skip
 `api` | api configuration information (api keys) | read further documentation for specifications 
 
 ## Validation
@@ -205,12 +205,15 @@ validateFile also allows you the option to `skip` or ignore a certain file. Simp
 
 Examples are listed below.
 
-#### validateBody(body, callback)
+#### validateBody(body, callback, skip)
 The validateBody method validates the request's body before sending off your file to the specified store. This is especially helpful for handling signups that require uploading some type of file (e.g a resume). For example, if the user signs up without filling in the proper fields, you can cancel the file upload (saves api requests and creates faster responses for errors). Here is an example with validating that a field called 'username' was sent.
 
 ```javascript
 const formPost = efp({
-	validateBody: function(body, cb) {
+	validateBody: function(body, cb, skip) {
+		if(file.fieldname != "validName") {
+			skip(); // skipping a file if their fieldname is not "validName"
+		}
 		if(body.username == undefined) {
 			return cb("Username is required");
 		}
