@@ -24,11 +24,6 @@ const ExpressFormPost = function(user_options = {}) {
 	} else {
 		user_options.validateBody = (body, handlePromise) => handlePromise();
 	}
-
-	// max file size
-	if(user_options.maxfileSize && !Number.isInteger(user_options.maxfileSize)) {
-		throw new Error("option 'maxfileSize' must be an integer.");
-	}
 	
 	// Available storage methods
 	if(!["disk", "aws-s3", "dropbox"].includes(user_options.store)) {
