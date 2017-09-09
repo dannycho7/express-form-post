@@ -76,7 +76,7 @@ const ExpressFormPost = function(user_options = {}) {
 
 	this.storeMethod = require(path.join(__dirname, "lib/store", this.opts.store));
 	let checkApi = () => {
-		if(!this.opts.api) throw new Error("You must specify api information to use " + this.opts.storage +  " storage");
+		if(!this.opts.api) throw new Error("You must specify api information to use " + this.opts.store +  " storage");
 	};
 
 	// set up abi objects here so we won't have to recreate upon sending stream to store handler
