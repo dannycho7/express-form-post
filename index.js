@@ -7,24 +7,22 @@ const attachListeners = require("./lib/attachListeners");
 const ExpressFormPost = function(user_options = {}) {
 	if(!(this instanceof ExpressFormPost)) return new ExpressFormPost(user_options);
 
-	// validateFile
-	if(user_options.validateFile) {
-		if(typeof user_options.validateFile != "function") throw new Error("option 'validateFile' must be a function.");
-	} else {
-		user_options.validateFile = (file, handlePromise) => handlePromise();
-	}
-	
-	/*
-	 * validateBody validates the req.body before sending off files to the store
-	 * if validateBody is set in any way, the file buffers will be sent to the store after the request has been validated
-	 * This means that file_contents.end() only triggers after the "end" event is emitted
-	 */
-	if(user_options.validateBody) {
-		if(typeof user_options.validateBody != "function") throw new Error("option validateBody must be a function.");
-	} else {
-		user_options.validateBody = (body, handlePromise) => handlePromise();
-	}
-	
+	["validateFile", "validateBody"].forEach((validateFunctionKey) => {
+		/*
+		 * validateBody validates the req.body before sending off files to the store
+		 * The file buffers will be sent to the store after the request has been validated
+		 * This means that file_contents.end() only triggers after the "end" event is emitted
+		 */
+		if(user_options[validateFunctionKey]) {
+			if(typeof user_options[validateFunctionKey] !== "function") {
+				let err_msg = "option '" + validateFunctionKey + "' must be a function.";
+				throw new Error(err_msg); 
+			}
+		} else {
+			user_options[validateFunctionKey] = (information, handlePromise) => handlePromise();
+		}
+	});
+
 	// Available storage methods
 	if(!["disk", "aws-s3", "dropbox"].includes(user_options.store)) {
 		if(user_options.store == undefined) {
@@ -60,14 +58,29 @@ const ExpressFormPost = function(user_options = {}) {
 		}
 	}
 
-
+	["minfileSize", "maxfileSize"].forEach((limitfileSizeKey) => {
+		switch(typeof user_options[limitfileSizeKey]) {
+			case "object":
+				break;
+			case "undefined":
+			case "number":
+				user_options[limitfileSizeKey] = {
+					size: user_options[limitfileSizeKey] || (limitfileSizeKey === "minfileSize" ? 0 : undefined)
+				};
+				break;
+			default: {
+				throw new Error("option '" + limitfileSizeKey + "' must be either an object or a number");
+				break;
+			}
+		}
+	});
 
 	this.opts = {
 		store: user_options.store,
 		directory: user_options.directory,
 		filename: user_options.filename,
-		maxfileSize: typeof user_options.maxfileSize === "object" ? user_options.maxfileSize : { size: user_options.maxfileSize },
-		minfileSize: typeof user_options.minfileSize === "object" ? user_options.minfileSize : { size: user_options.minfileSize || 0},
+		maxfileSize: user_options.maxfileSize,
+		minfileSize: user_options.minfileSize,
 		validateFile: user_options.validateFile,
 		validateBody: user_options.validateBody,
 		api: user_options.api,
