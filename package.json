@@ -4,7 +4,8 @@
   "description": "Simple, reliable and memory efficient http file parse and upload api",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha test/*",
+    "test:unit": "mocha test/unit"
   },
   "keywords": [
     "fileupload",

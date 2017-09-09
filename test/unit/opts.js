@@ -9,6 +9,9 @@ describe("Creating efp instance with different options", () => {
 				let formPost = efp({
 					validateFile: 1
 				});
+			}, (err) => {
+				assert.equal(err.message, "option 'validateFile' must be a function.");
+				return true;
 			});
 		});
 	});
@@ -19,6 +22,9 @@ describe("Creating efp instance with different options", () => {
 				let formPost = efp({
 					validateBody: 1
 				});
+			}, (err) => {
+				assert.equal(err.message, "option 'validateBody' must be a function.");
+				return true;
 			});
 		});
 	});
@@ -40,7 +46,6 @@ describe("Creating efp instance with different options", () => {
 				});
 			}, (err) => {
 				let expected_msg = "storage 1 is not supported by express-form-post.\n\tCurrently available: ['disk', 'aws-s3', 'dropbox']";
-				assert.equal(err instanceof Error, true);
 				assert.equal(err.message, expected_msg);
 				return true;
 			});
@@ -61,6 +66,28 @@ describe("Creating efp instance with different options", () => {
 					store: "disk"
 				});
 			}, (err) => console.log(err));
+		});
+	});
+
+	describe("#fileSize", () => {
+		it("minfileSize should take either a number or an object", () => {
+			assert.doesNotThrow(() => {
+				let formPostNumber = efp({
+					minfileSize: 10
+				});
+
+				let formPostObj = efp({
+					minfileSize: { size: 10 }
+				});
+			});
+		});
+
+		it("should raise error when minfileSize is anything other than a number or an object", () => {
+			assert.throws(() => {
+				let formPost = efp({
+					minfileSize: false
+				});
+			});
 		});
 	});
 });
