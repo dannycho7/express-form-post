@@ -116,7 +116,7 @@ app.post("/upload", formPost.middleware(), function(req, res, next) {
 ## Usage with aws-s3
 
 ```sh
-$ npm install aws-sdk --save
+$ npm install aws-sdk@2.56.0 --save
 ```
 
 ```javascript
@@ -146,7 +146,7 @@ app.post("/upload", formPost.middleware(), function(req, res, next) {
 ## Usage with dropbox
 
 ```sh
-$ npm install dropbox-stream --save
+$ npm install dropbox-stream@1.1 --save
 ```
 
 ```javascript
